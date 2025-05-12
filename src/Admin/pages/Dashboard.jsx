@@ -6,6 +6,7 @@ import {
   InboxIcon,
   BookOpenIcon,
   PhoneIcon,
+  FolderIcon,
   UserIcon,
   CalendarIcon,
   EnvelopeIcon,
@@ -57,15 +58,23 @@ const Dashboard = () => {
         };
 
         // Fetch all data in parallel with token, including ratings
-        const [productsRes, ordersRes, categoriesRes, usersRes, contactsRes, reviewsRes] =
-          await Promise.all([
-            axios.get(`${USER_BASE_URL}/api/products`, { headers }),
-            axios.get(`${USER_BASE_URL}/api/order/getall`, { headers }),
-            axios.get(`${USER_BASE_URL}/api/category`, { headers }),
-            axios.get(`${USER_BASE_URL}/api/users/profile`, { headers }),
-            axios.get(`${USER_BASE_URL}/api/contacts/getContact`, { headers }),
-            axios.get(`${USER_BASE_URL}/api/ratings`, { headers }), // Added ratings endpoint
-          ]);
+        const [
+          productsRes,
+          ordersRes,
+          categoriesRes,
+          collectionsRes,
+          usersRes,
+          contactsRes,
+          reviewsRes,
+        ] = await Promise.all([
+          axios.get(`${USER_BASE_URL}/api/products`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/order/getall`, { headers }),
+          axios.get(`${USER_BASE_URL}/categories`, { headers }),
+          axios.get(`${USER_BASE_URL}/collections`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/users/profile`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/contacts/getContact`, { headers }),
+          axios.get(`${USER_BASE_URL}/api/ratings`, { headers }), // Added ratings endpoint
+        ]);
 
         // Get 5 most recent users
         const sortedUsers = [...usersRes.data]
@@ -76,6 +85,7 @@ const Dashboard = () => {
           products: productsRes.data.length,
           orders: ordersRes.data.length,
           categories: categoriesRes.data.length,
+          collections: collectionsRes.data.length,
           users: usersRes.data.length,
           contacts: contactsRes.data.length,
           ratings: reviewsRes.data.length, // Set ratings count
@@ -116,15 +126,23 @@ const Dashboard = () => {
       };
 
       // Fetch all data in parallel with token, including ratings
-      const [productsRes, ordersRes, categoriesRes, usersRes, contactsRes, reviewsRes] =
-        await Promise.all([
-          axios.get(`${USER_BASE_URL}/api/products`, { headers }),
-          axios.get(`${USER_BASE_URL}/api/order/getall`, { headers }),
-          axios.get(`${USER_BASE_URL}/api/category`, { headers }),
-          axios.get(`${USER_BASE_URL}/api/users/profile`, { headers }),
-          axios.get(`${USER_BASE_URL}/api/contacts/getContact`, { headers }),
-          axios.get(`${USER_BASE_URL}/api/ratings`, { headers }), // Added ratings endpoint
-        ]);
+      const [
+        productsRes,
+        ordersRes,
+        categoriesRes,
+        collectionsRes,
+        usersRes,
+        contactsRes,
+        reviewsRes,
+      ] = await Promise.all([
+        axios.get(`${USER_BASE_URL}/api/products`, { headers }),
+        axios.get(`${USER_BASE_URL}/api/order/getall`, { headers }),
+        axios.get(`${USER_BASE_URL}/categories`, { headers }),
+        axios.get(`${USER_BASE_URL}/collections`, { headers }),
+        axios.get(`${USER_BASE_URL}/api/users/profile`, { headers }),
+        axios.get(`${USER_BASE_URL}/api/contacts/getContact`, { headers }),
+        axios.get(`${USER_BASE_URL}/api/ratings`, { headers }), // Added ratings endpoint
+      ]);
 
       const sortedUsers = [...usersRes.data]
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -134,6 +152,7 @@ const Dashboard = () => {
         products: productsRes.data.length,
         orders: ordersRes.data.length,
         categories: categoriesRes.data.length,
+        collections: collectionsRes.data.length,
         users: usersRes.data.length,
         contacts: contactsRes.data.length,
         ratings: reviewsRes.data.length, // Set ratings count
@@ -171,6 +190,12 @@ const Dashboard = () => {
       color: "bg-red-100 text-red-600",
     },
     {
+      name: "Collections",
+      value: stats.categories,
+      icon: FolderIcon,
+      color: "bg-teal-100 text-teal-600",
+    },
+    {
       name: "Products",
       value: stats.products,
       icon: ShoppingBagIcon,
@@ -203,7 +228,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+    <div className="container mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
         <div className="flex items-center">
@@ -228,7 +253,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3 xl:grid-cols-6">
+      <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         {statsData.map((stat) => (
           <div
             key={stat.name}
@@ -358,6 +383,19 @@ const Dashboard = () => {
                   <span>Manage Categories</span>
                 </div>
               </Link>
+
+              {/* New Collections Link */}
+              <Link
+                to="/admin/collections"
+                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-center">
+                  <FolderIcon className="h-5 w-5 text-teal-600 mr-3" />{" "}
+                  {/* New Icon */}
+                  <span>Manage Collections</span>
+                </div>
+              </Link>
+
               <Link
                 to="/admin/products"
                 className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"

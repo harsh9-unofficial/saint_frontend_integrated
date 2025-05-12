@@ -26,9 +26,7 @@ const Products = () => {
       const response = await axios.get(`${USER_BASE_URL}/api/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // console.log("Fetched products:", response.data);
 
-      // Parse images field if it's a JSON string
       const parsedProducts = response.data.map((product) => ({
         ...product,
         images:

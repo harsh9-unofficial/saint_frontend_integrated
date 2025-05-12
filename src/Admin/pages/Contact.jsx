@@ -25,7 +25,7 @@ const Contact = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `${USER_BASE_URL}/api/contacts/getContact`,
+        `${USER_BASE_URL}/contacts/getContact`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -50,7 +50,7 @@ const Contact = () => {
       window.confirm("Are you sure you want to delete this contact request?")
     ) {
       try {
-        await axios.delete(`${USER_BASE_URL}/api/contacts/remove/${id}`, {
+        await axios.delete(`${USER_BASE_URL}/contacts/remove/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
