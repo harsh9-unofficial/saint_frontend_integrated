@@ -52,9 +52,7 @@ const Categories = () => {
   return (
     <div className="container mx-auto px-4 py-6 h-full">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Manage Categories
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-800">Manage Categories</h1>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <div className="relative flex-grow">
@@ -93,10 +91,10 @@ const Categories = () => {
           {categories.map((category) => (
             <div
               key={category.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col min-h-[300px]"
+              className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col"
             >
-              <div className="relative overflow-hidden bg-gray-100">
-                {category.image ? (
+              <div className=" overflow-hidden bg-gray-100">
+                {/* {category.image ? (
                   <img
                     src={`${USER_BASE_URL}${category.image}`}
                     alt={category.name}
@@ -106,7 +104,7 @@ const Categories = () => {
                   <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
                     No Image
                   </div>
-                )}
+                )} */}
 
                 <div className="absolute top-3 right-3 flex space-x-2">
                   <button
@@ -114,13 +112,13 @@ const Categories = () => {
                       setCurrentBlog(category);
                       setIsModalOpen(true);
                     }}
-                    className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-indigo-50"
+                    className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-[#52755759] cursor-pointer"
                   >
                     <PencilSquareIcon className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(category.id)}
-                    className="p-2 bg-white rounded-full shadow text-red-600 hover:bg-red-50"
+                    className="p-2 bg-white rounded-full shadow text-red-600 hover:bg-red-100 cursor-pointer"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </button>
@@ -128,19 +126,12 @@ const Categories = () => {
               </div>
 
               <div className="p-4 flex-grow flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center text-xs text-gray-500 mb-2">
-                    <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
-                      {category.name || "Uncategorized"}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2 line-clamp-2">
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm line-clamp-3">
-                    {category.content}
-                  </p>
-                </div>
+                <h3 className="text-lg font-semibold line-clamp-2">
+                  {category.name}
+                </h3>
+                <p className="text-gray-600 text-sm line-clamp-3">
+                  {category.content}
+                </p>
               </div>
             </div>
           ))}
