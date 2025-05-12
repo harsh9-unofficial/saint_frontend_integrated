@@ -14,7 +14,11 @@ const Header = () => {
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const isLoggedIn = !!localStorage.getItem("token");
+
+  // Check token, userId, and isAdmin from localStorage
+  const token = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Convert string to boolean
 
   const shopRef = useRef(null);
   const collectionRef = useRef(null);
@@ -41,10 +45,14 @@ const Header = () => {
   };
 
   const toggleUserMenu = () => {
-    setUserMenuOpen(!userMenuOpen);
-    setShopOpen(false);
-    setCollectionOpen(false);
-    setCartOpen(false);
+    if (userId) {
+      setUserMenuOpen(!userMenuOpen);
+      setShopOpen(false);
+      setCollectionOpen(false);
+      setCartOpen(false);
+    } else {
+      navigate("/login");
+    }
   };
 
   const handleLogout = () => {
@@ -244,6 +252,7 @@ const Header = () => {
             <img src="/images/Logo.png" alt="Saint" className="w-full" />
           </Link>
         </div>
+
         {/* Right icons */}
         <div className="flex items-center space-x-3">
           <button className="hover:text-[#527557] cursor-pointer">
@@ -256,30 +265,35 @@ const Header = () => {
             <CgShoppingBag className="text-[24px] lg:text-[26px]" />
           </button>
           <div className="relative" ref={userMenuRef}>
-            {isLoggedIn ? (
-              <button
-                onClick={toggleUserMenu}
-                className="hover:text-[#527557] cursor-pointer"
-              >
-                <FiUser className="text-[24px] lg:text-[26px] mt-2" />
-              </button>
-            ) : (
-              <Link to="/login" className="hover:text-[#527557] cursor-pointer">
-                <FiUser className="text-[24px] lg:text-[26px]" />
-              </Link>
-            )}
-            {isLoggedIn && userMenuOpen && (
+            <button
+              onClick={toggleUserMenu}
+              className="hover:text-[#527557] cursor-pointer"
+            >
+              <FiUser className="text-[24px] lg:text-[26px] mt-2" />
+            </button>
+            {userId && userMenuOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-lg z-50">
-                <Link
-                  to="/profile"
-                  className="block px-4 py-2 text-gray-800 hover:bg-[#527557] hover:text-white"
-                  onClick={() => setUserMenuOpen(false)}
-                >
-                  Profile
-                </Link>
+                {!isAdmin && (
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 text-gray-800 hover:bg-[#527557] rounded-t-lg hover:text-white"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="block px-4 py-2 text-gray-800 hover:bg-[#527557] rounded-b-lg hover:text-white"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-[#527557] hover:text-white"
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-[#527557] cursor-pointer hover:text-white"
                 >
                   Logout
                 </button>
@@ -416,7 +430,7 @@ const Header = () => {
       >
         <div
           ref={cartRef}
-          className={`fixed top-0 right-0 h-full w-full sm:w-100 bg-white shadow-lg transform transition-transform duration-300 ${
+          className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-lg transform transition-transform duration-300 ${
             cartOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >

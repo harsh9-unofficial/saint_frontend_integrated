@@ -1,10 +1,8 @@
-// src/admin/components/Topbar.jsx
-import React from "react";
+import { TbLogout } from "react-icons/tb";
+
 import {
   Bars3Icon as MenuIcon,
-  BellIcon,
   MagnifyingGlassIcon as SearchIcon,
-  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 
@@ -12,13 +10,10 @@ const Topbar = ({ onMenuClick }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.clear(); // ya sirf token hata: localStorage.removeItem("token")
-    navigate("/"); // login route pe redirect
+    localStorage.clear();
+    navigate("/");
   };
 
-  const user = {
-    name: "Pradip",
-  };
   return (
     <div className="relative z-10 flex-shrink-0 flex h-16 bg-white border-b border-gray-200">
       {/* Mobile menu button */}
@@ -54,10 +49,10 @@ const Topbar = ({ onMenuClick }) => {
           <button
             type="button"
             onClick={handleLogout}
-            className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#527557]"
+            className="bg-white rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#527557]"
           >
             <span className="sr-only">Logout</span>
-            <ArrowRightOnRectangleIcon className="h-6 w-6 text-black" />
+            <TbLogout className="h-7 w-7 text-black cursor-pointer" />
           </button>
 
           {/* Profile dropdown */}
