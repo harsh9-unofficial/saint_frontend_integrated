@@ -51,8 +51,7 @@ const CollectionModal = ({
           ? collection.images.map((img) => `${USER_BASE_URL}/${img}`)
           : []
       );
-    стек
-
+      стек;
     } else {
       setFormData({
         name: "",
@@ -90,7 +89,7 @@ const CollectionModal = ({
     }
     // Append each image file as `images[]`
     formData.images.forEach((image) => {
-      formPayload.append("images", image);
+      formPayload.append("images", image); // Field name is "images"
     });
 
     try {

@@ -123,13 +123,13 @@ const Collections = () => {
                         setCurrentBlog(collection);
                         setIsModalOpen(true);
                       }}
-                      className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-indigo-50"
+                      className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-indigo-50 cursor-pointer"
                     >
                       <PencilSquareIcon className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(collection.id)}
-                      className="p-2 bg-white rounded-full shadow text-red-600 hover:bg-red-50"
+                      className="p-2 bg-white rounded-full shadow text-red-600 hover:bg-red-100 cursor-pointer"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </button>
