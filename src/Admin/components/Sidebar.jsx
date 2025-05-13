@@ -7,21 +7,18 @@ import {
   StarIcon,
   EnvelopeIcon,
   InboxIcon,
-  SwatchIcon,
-  BeakerIcon ,
   FolderIcon,
   XMarkIcon as XIcon,
 } from "@heroicons/react/24/outline";
-import { IoColorPaletteOutline } from "react-icons/io5";
-
+import { Palette, Ruler } from "lucide-react";
 
 const Sidebar = ({ onClose }) => {
   const navItems = [
     { name: "Dashboard", path: "/admin", icon: ChartBarIcon },
     { name: "Categories", path: "/admin/categories", icon: Squares2X2Icon },
     { name: "Collections", path: "/admin/collections", icon: FolderIcon },
-    { name: "Colors", path: "/admin/colors", icon: IoColorPaletteOutline },
-    { name: "Sizes", path: "/admin/sizes", icon: BeakerIcon  },
+    { name: "Colors", path: "/admin/colors", icon: Palette },
+    { name: "Sizes", path: "/admin/sizes", icon: Ruler },
     { name: "Products", path: "/admin/products", icon: ShoppingBagIcon },
     { name: "Users", path: "/admin/users", icon: UsersIcon },
     { name: "Reviews", path: "/admin/reviews", icon: StarIcon },

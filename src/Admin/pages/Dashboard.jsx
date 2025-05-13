@@ -17,6 +17,8 @@ import {
   ShoppingBag,
   Users,
   Star,
+  Palette,
+  Ruler,
   MessageCircle,
   Receipt,
 } from "lucide-react";
@@ -301,7 +303,7 @@ const Dashboard = () => {
                   recentUsers.map((user) => (
                     <li
                       key={user.id}
-                      className="px-4 py-4 sm:px-6 hover:bg-gray-50"
+                      className="px-4 py-4 sm:px-6 hover:bg-gray-200"
                     >
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-indigo-600 truncate">
@@ -376,7 +378,7 @@ const Dashboard = () => {
             <div className="space-y-4">
               <Link
                 to="/admin/categories"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
                   <ListTree className="h-5 w-5 text-green-600 mr-3" />
@@ -387,36 +389,60 @@ const Dashboard = () => {
               {/* New Collections Link */}
               <Link
                 to="/admin/collections"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
-                  <FolderIcon className="h-5 w-5 text-teal-600 mr-3" />{" "}
+                  <FolderIcon className="h-5 w-5 text-sky-600 mr-3" />
                   {/* New Icon */}
                   <span>Manage Collections</span>
                 </div>
               </Link>
 
+              {/* New Colors Link */}
               <Link
-                to="/admin/products"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                to="/admin/colors"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
-                  <ShoppingBag className="h-5 w-5 text-indigo-600 mr-3" />
+                  <Palette className="h-5 w-5 text-rose-500 mr-3" />
+                  {/* New Icon */}
+                  <span>Manage Colors</span>
+                </div>
+              </Link>
+
+              {/* New Sizes Link */}
+              <Link
+                to="/admin/sizes"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <div className="flex items-center">
+                  <Ruler className="h-5 w-5 text-indigo-600 mr-3" />
+                  {/* New Icon */}
+                  <span>Manage Sizes</span>
+                </div>
+              </Link>
+
+              <Link
+                to="/admin/products"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <div className="flex items-center">
+                  <ShoppingBag className="h-5 w-5 text-purple-600 mr-3" />
                   <span>Manage Products</span>
                 </div>
               </Link>
               <Link
                 to="/admin/users"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
-                  <Users className="h-5 w-5 text-red-600 mr-3" />
+                  <Users className="h-5 w-5 text-blue-600 mr-3" />
                   <span>Manage Users</span>
                 </div>
               </Link>
               <Link
                 to="/admin/ratings"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
                   <Star className="h-5 w-5 text-yellow-600 mr-3" />
@@ -425,19 +451,19 @@ const Dashboard = () => {
               </Link>
               <Link
                 to="/admin/contact"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
-                  <MessageCircle className="h-5 w-5 text-pink-600 mr-3" />
+                  <MessageCircle className="h-5 w-5 text-teal-600 mr-3" />
                   <span>View Contacts</span>
                 </div>
               </Link>
               <Link
                 to="/admin/orders"
-                className="block p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
-                  <Receipt className="h-5 w-5 text-yellow-600 mr-3" />
+                  <Receipt className="h-5 w-5 text-orange-600 mr-3" />
                   <span>View Orders</span>
                 </div>
               </Link>
