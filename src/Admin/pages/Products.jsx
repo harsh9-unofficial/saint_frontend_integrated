@@ -4,11 +4,152 @@ import {
   PencilSquareIcon,
   TrashIcon,
   ArrowPathIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import axios from "axios";
 import ProductModal from "./ProductModal";
 import { USER_BASE_URL } from "../../config";
 import { toast } from "react-hot-toast";
+
+const ProductDetailsModal = ({ isOpen, onClose, product }) => {
+  if (!isOpen || !product) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">{product.name}</h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div className="space-y-4">
+          {product.images && product.images.length > 0 ? (
+            <img
+              src={`${USER_BASE_URL}${product.images[0]}`}
+              alt={product.name}
+              className="w-full h-48 object-cover rounded-lg"
+            />
+          ) : (
+            <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-sm">
+              No Image
+            </div>
+          )}
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Category</h3>
+            <p className="text-gray-500">{product.Category?.name || "-"}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Collection</h3>
+            <p className="text-gray-500">{product.Collection?.name || "-"}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Base Price</h3>
+            <p className="text-gray-500">{product.basePrice || "-"}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Colors</h3>
+            <p className="text-gray-500">
+              {product.ProductColors.length > 0
+                ? product.ProductColors.map((c) => c.Color.name).join(", ")
+                : "-"}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Sizes</h3>
+            <p className="text-gray-500">
+              {product.ProductSizes?.length > 0
+                ? product.ProductSizes.map(
+                    (s) =>
+                      `${s.name} (Stock: ${s.stock}) -> (Original Price: ${s.originalPrice})`
+                  ).join(", ")
+                : "-"}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Description</h3>
+            <p className="text-gray-500">{product.description || "-"}</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Details</h3>
+            {product.details?.length > 0 ? (
+              <ul className="list-disc pl-5 text-gray-500">
+                {product.details.map((detail, index) => (
+                  <li key={index}>{detail}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">-</p>
+            )}
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">Size & Fit</h3>
+            {product.sizeFit?.length > 0 ? (
+              <ul className="list-disc pl-5 text-gray-500">
+                {product.sizeFit.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">-</p>
+            )}
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">
+              Material & Care
+            </h3>
+            {product.materialCare?.length > 0 ? (
+              <ul className="list-disc pl-5 text-gray-500">
+                {product.materialCare.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">-</p>
+            )}
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-700">
+              Shipping & Return
+            </h3>
+            {product.shippingReturn?.length > 0 ? (
+              <ul className="list-disc pl-5 text-gray-500">
+                {product.shippingReturn.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">-</p>
+            )}
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-[#527557] text-white rounded-lg hover:bg-[#426146]"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -16,6 +157,7 @@ const Products = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
@@ -35,17 +177,24 @@ const Products = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Backend returns images as array, no parsing needed
+      console.log(response.data);
+
       const parsedProducts = response.data.map((product) => ({
         ...product,
         images: product.images || [],
         Colors: product.Colors || [],
         Sizes: product.Sizes || [],
         Category: product.Category || { name: "-" },
-        Collection: product.Collection || { name: "-" }, // Add Collection
+        Collection: product.Collection || { name: "-" },
+        details: Array.isArray(product.details) ? product.details : [],
+        sizeFit: Array.isArray(product.sizeFit) ? product.sizeFit : [],
+        materialCare: Array.isArray(product.materialCare)
+          ? product.materialCare
+          : [],
+        shippingReturn: Array.isArray(product.shippingReturn)
+          ? product.shippingReturn
+          : [],
       }));
-
-      console.log(parsedProducts);
 
       setProducts(parsedProducts);
       setFilteredProducts(parsedProducts);
@@ -70,7 +219,7 @@ const Products = () => {
       [
         product.name,
         product.Category?.name,
-        product.Collection?.name, // Add Collection to search
+        product.Collection?.name,
         product.description,
         product.basePrice?.toString(),
       ]
@@ -104,7 +253,7 @@ const Products = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 h-full">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-800">Manage Products</h1>
 
@@ -152,138 +301,70 @@ const Products = () => {
           <p className="text-gray-500 text-lg">No products found</p>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Image
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Collection
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Colors
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sizes
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.map((product) => (
-                <tr key={product.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {product.images && product.images.length > 0 ? (
-                      <img
-                        src={`${USER_BASE_URL}${product.images[0]}`}
-                        alt={product.name}
-                        className="h-12 w-12 object-cover rounded"
-                        onError={(e) => {
-                          console.error(
-                            `Failed to load image: ${e.target.src}`
-                          );
-                          e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "flex";
-                        }}
-                      />
-                    ) : null}
-                    <div
-                      className={`h-12 w-12 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs ${
-                        product.images && product.images.length > 0
-                          ? "hidden"
-                          : "flex"
-                      }`}
-                    >
-                      No Image
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {product.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {product.Category?.name || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {product.Collection?.name || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      ${product.basePrice || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {product.Colors?.length > 0
-                        ? product.Colors.map((c) => c.name).join(", ")
-                        : "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {product.Sizes?.length > 0
-                        ? product.Sizes.map((s) => s.name).join(", ")
-                        : "-"}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="text-sm text-gray-500 line-clamp-2">
-                      {product.description || "-"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => {
-                          setCurrentProduct({
-                            ...product,
-                            images: product.images,
-                            Colors: product.Colors,
-                            Sizes: product.Sizes,
-                            categoryId: product.categoryId,
-                            collectionId: product.collectionId,
-                          });
-                          setIsModalOpen(true);
-                        }}
-                        className="text-[#527557]"
-                        title="Edit"
-                      >
-                        <PencilSquareIcon className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="text-red-600"
-                        title="Delete"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col min-h-[300px]"
+            >
+              <div className="overflow-hidden bg-gray-100 h-72">
+                {product.images && product.images.length > 0 ? (
+                  <img
+                    src={`${USER_BASE_URL}${product.images[0]}`}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                    No Image
+                  </div>
+                )}
+
+                <div className="absolute top-3 right-3 flex flex-col space-y-2">
+                  <button
+                    onClick={() => {
+                      setCurrentProduct(product);
+                      setIsDetailsModalOpen(true);
+                    }}
+                    className="p-2 bg-white rounded-full shadow text-blue-600 hover:bg-blue-50 cursor-pointer"
+                    title="View Details"
+                  >
+                    <EyeIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setCurrentProduct(product); // Pass the full product object
+                      setIsModalOpen(true);
+                    }}
+                    className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-indigo-50 cursor-pointer"
+                    title="Edit"
+                  >
+                    <PencilSquareIcon className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className="p-2 bg-white rounded-full shadow text-red-600 hover:bg-red-100 cursor-pointer"
+                    title="Delete"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 flex-grow flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center text-xs text-gray-500 mb-2">
+                    <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
+                      {product.Category?.name || "Uncategorized"}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold line-clamp-2">
+                    {product.name}
+                  </h3>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -293,6 +374,12 @@ const Products = () => {
         product={currentProduct}
         refreshProducts={fetchProducts}
         token={token}
+      />
+
+      <ProductDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        product={currentProduct}
       />
     </div>
   );

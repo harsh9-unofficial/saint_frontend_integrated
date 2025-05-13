@@ -17,7 +17,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     materialCare: [],
     shippingReturn: [],
     images: [],
-    colors: [], // Stores { colorId, hexCode, name }
+    colors: [],
     sizes: [],
   });
   const [previewImages, setPreviewImages] = useState([]);
@@ -30,7 +30,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     colorId: "",
     hexCode: "",
     name: "",
-  }); // Include name
+  });
   const [sizeInput, setSizeInput] = useState({
     sizeId: "",
     name: "",
@@ -75,6 +75,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
   // Initialize form when product changes
   useEffect(() => {
+    console.log("Product prop in ProductModal:", product); // Debug
     if (product) {
       setFormData({
         name: product.name || "",
@@ -82,26 +83,26 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
         description: product.description || "",
         categoryId: product.categoryId || "",
         collectionId: product.collectionId || "",
-        details: product.details || [],
-        sizeFit: product.sizeFit || [],
-        materialCare: product.materialCare || [],
-        shippingReturn: product.shippingReturn || [],
+        details: Array.isArray(product.details) ? product.details : [],
+        sizeFit: Array.isArray(product.sizeFit) ? product.sizeFit : [],
+        materialCare: Array.isArray(product.materialCare) ? product.materialCare : [],
+        shippingReturn: Array.isArray(product.shippingReturn) ? product.shippingReturn : [],
         images: [],
         colors:
-          product.ProductColors?.map((color) => ({
-            colorId: color.colorId,
-            hexCode: color.hexCode,
-            name: color.name,
+          product.Colors?.map((color) => ({
+            colorId: color.id,
+            hexCode: color.hexCode || "",
+            name: color.name || "",
           })) || [],
         sizes:
-          product.ProductSizes?.map((size) => ({
-            sizeId: color.sizeId,
-            name: size.name,
-            originalPrice: size.originalPrice,
-            stock: size.stock,
+          product.Sizes?.map((size) => ({
+            sizeId: size.id,
+            name: size.name || "",
+            originalPrice: size.originalPrice || "",
+            stock: size.stock || "",
           })) || [],
       });
-      setPreviewImages(product.Images?.map((img) => img.imageUrl) || []);
+      setPreviewImages(product.images?.map((img) => `${USER_BASE_URL}${img}`) || []);
     } else {
       setFormData({
         name: "",
@@ -311,7 +312,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     formPayload.append(
       "colors",
       JSON.stringify(formData.colors.map((c) => ({ colorId: c.colorId })))
-    ); // Only send colorId to backend
+    );
     formPayload.append("sizes", JSON.stringify(formData.sizes));
 
     try {
@@ -654,7 +655,6 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                   </option>
                 )}
               </select>
-              {/* Color swatch preview */}
               <div
                 className="w-10 h-10 rounded border"
                 style={{
@@ -769,8 +769,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                   className="flex justify-between items-center bg-gray-50 p-2 rounded"
                 >
                   <span>
-                    {size.name || "Unnamed Size"} - ₹{size.originalPrice}{" "}
-                    (Stock: {size.stock})
+                    {size.name || "Unnamed Size"} - ₹{size.originalPrice} (Stock: {size.stock})
                   </span>
                   <button
                     type="button"
