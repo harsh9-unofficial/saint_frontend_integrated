@@ -38,6 +38,8 @@ import Users from "./Admin/pages/Users";
 import Orders from "./Admin/pages/Orders";
 import CollectionPage from "./components/CollectionPage";
 import Collections from "./Admin/pages/Collections";
+import Colors from "./Admin/pages/Colors";
+import Sizes from "./Admin/pages/Sizes";
 
 // Function to decode JWT token
 // function decodeJwt(token) {
@@ -175,11 +177,13 @@ function App() {
         {/* Admin Panel Layout */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="products" element={<Products />} />
-          <Route path="reviews" element={<Reviews />} />
           <Route path="categories" element={<Blogs />} />
           <Route path="collections" element={<Collections />} />
+          <Route path="colors" element={<Colors />} />
+          <Route path="sizes" element={<Sizes />} />
+          <Route path="products" element={<Products />} />
           <Route path="users" element={<Users />} />
+          <Route path="reviews" element={<Reviews />} />
           <Route path="contact" element={<Contact />} />
           <Route path="orders" element={<Orders />} />
         </Route>
