@@ -8,116 +8,122 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
   const token = localStorage.getItem("token");
   const [formData, setFormData] = useState({
     name: "",
+    basePrice: "",
+    description: "",
     categoryId: "",
-    price: "",
-    shortDescription: "",
-    longDescription: "",
-    suitableSurfaces: "",
-    stock: 0,
-    features: [],
-    howToUse: [],
+    collectionId: "",
+    details: [],
+    sizeFit: [],
+    materialCare: [],
+    shippingReturn: [],
     images: [],
-    volume: "",
-    ingredients: "",
-    scent: "",
-    phLevel: "",
-    shelfLife: "",
-    madeIn: "",
-    packaging: "",
-    combos: false,
+    colors: [], // Stores { colorId, hexCode, name }
+    sizes: [],
   });
   const [previewImages, setPreviewImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [featureInput, setFeatureInput] = useState("");
-  const [howToUseInput, setHowToUseInput] = useState("");
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [availableColors, setAvailableColors] = useState([]);
+  const [availableSizes, setAvailableSizes] = useState([]);
+  const [colorInput, setColorInput] = useState({
+    colorId: "",
+    hexCode: "",
+    name: "",
+  }); // Include name
+  const [sizeInput, setSizeInput] = useState({
+    sizeId: "",
+    name: "",
+    originalPrice: "",
+    stock: "",
+  });
+  const [detailInput, setDetailInput] = useState("");
+  const [sizeFitInput, setSizeFitInput] = useState("");
+  const [materialCareInput, setMaterialCareInput] = useState("");
+  const [shippingReturnInput, setShippingReturnInput] = useState("");
 
-  // Fetch categories for dropdown
+  // Fetch categories, collections, colors, and sizes
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(`${USER_BASE_URL}/api/category`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCategories(response.data);
+        const [categoryRes, collectionRes, colorRes, sizeRes] =
+          await Promise.all([
+            axios.get(`${USER_BASE_URL}/categories`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get(`${USER_BASE_URL}/collections`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get(`${USER_BASE_URL}/colors`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+            axios.get(`${USER_BASE_URL}/sizes`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }),
+          ]);
+        setCategories(categoryRes.data);
+        setCollections(collectionRes.data);
+        setAvailableColors(colorRes.data);
+        setAvailableSizes(sizeRes.data);
       } catch (error) {
-        console.error("Error fetching categories:", error);
-        toast.error("Failed to load categories");
+        console.error("Error fetching data:", error);
+        toast.error("Failed to load data");
       }
     };
-    fetchCategories();
+    if (token) fetchData();
   }, [token]);
 
   // Initialize form when product changes
   useEffect(() => {
     if (product) {
-      console.log("Product data:", product);
       setFormData({
         name: product.name || "",
-        suitableSurfaces: product.suitableSurfaces || "",
+        basePrice: product.basePrice || "",
+        description: product.description || "",
         categoryId: product.categoryId || "",
-        price: product.price || "",
-        shortDescription: product.shortDescription || "",
-        longDescription: product.longDescription || "",
-        stock: product.stock || 0,
-        features: Array.isArray(product.features)
-          ? product.features
-          : product.features
-          ? JSON.parse(product.features)
-          : [],
-        howToUse: Array.isArray(product.howToUse)
-          ? product.howToUse
-          : product.howToUse
-          ? JSON.parse(product.howToUse)
-          : [],
+        collectionId: product.collectionId || "",
+        details: product.details || [],
+        sizeFit: product.sizeFit || [],
+        materialCare: product.materialCare || [],
+        shippingReturn: product.shippingReturn || [],
         images: [],
-        volume: product.volume || "",
-        ingredients: product.ingredients || "",
-        scent: product.scent || "",
-        phLevel: product.phLevel || "",
-        shelfLife: product.shelfLife || "",
-        madeIn: product.madeIn || "",
-        packaging: product.packaging || "",
-        combos: product.combos || false,
+        colors:
+          product.ProductColors?.map((color) => ({
+            colorId: color.colorId,
+            hexCode: color.hexCode,
+            name: color.name,
+          })) || [],
+        sizes:
+          product.ProductSizes?.map((size) => ({
+            sizeId: color.sizeId,
+            name: size.name,
+            originalPrice: size.originalPrice,
+            stock: size.stock,
+          })) || [],
       });
-      // Set preview images from existing product
-      const existingImages = Array.isArray(product.images)
-        ? product.images
-        : product.images
-        ? JSON.parse(product.images)
-        : [];
-      setPreviewImages(existingImages.map((img) => `${USER_BASE_URL}/${img}`));
+      setPreviewImages(product.Images?.map((img) => img.imageUrl) || []);
     } else {
       setFormData({
         name: "",
-        suitableSurfaces: "",
+        basePrice: "",
+        description: "",
         categoryId: "",
-        price: "",
-        shortDescription: "",
-        longDescription: "",
-        stock: 0,
-        features: [],
-        howToUse: [],
+        collectionId: "",
+        details: [],
+        sizeFit: [],
+        materialCare: [],
+        shippingReturn: [],
         images: [],
-        volume: "",
-        ingredients: "",
-        scent: "",
-        phLevel: "",
-        shelfLife: "",
-        madeIn: "",
-        packaging: "",
-        combos: false,
+        colors: [],
+        sizes: [],
       });
       setPreviewImages([]);
     }
   }, [product]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImagesChange = (e) => {
@@ -130,113 +136,188 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     setPreviewImages(files.map((file) => URL.createObjectURL(file)));
   };
 
-  const addFeature = () => {
-    if (featureInput.trim()) {
-      if (formData.features.includes(featureInput.trim())) {
-        toast.error("Feature already exists");
+  const addColor = () => {
+    if (colorInput.colorId && colorInput.hexCode && colorInput.name) {
+      if (
+        formData.colors.some((c) => c.colorId === parseInt(colorInput.colorId))
+      ) {
+        toast.error("Color already added");
         return;
       }
       setFormData((prev) => ({
         ...prev,
-        features: [...prev.features, featureInput.trim()],
+        colors: [
+          ...prev.colors,
+          {
+            colorId: parseInt(colorInput.colorId),
+            hexCode: colorInput.hexCode,
+            name: colorInput.name,
+          },
+        ],
       }));
-      setFeatureInput("");
+      setColorInput({ colorId: "", hexCode: "", name: "" });
+    } else {
+      toast.error("Please select a color");
     }
   };
 
-  const removeFeature = (index) => {
+  const removeColor = (index) => {
     setFormData((prev) => ({
       ...prev,
-      features: prev.features.filter((_, i) => i !== index),
+      colors: prev.colors.filter((_, i) => i !== index),
     }));
   };
 
-  const addHowToUse = () => {
-    if (howToUseInput.trim()) {
-      if (formData.howToUse.includes(howToUseInput.trim())) {
-        toast.error("How to Use item already exists");
+  const addSize = () => {
+    if (
+      sizeInput.sizeId &&
+      sizeInput.name.trim() &&
+      sizeInput.originalPrice !== "" &&
+      sizeInput.stock !== ""
+    ) {
+      if (formData.sizes.some((s) => s.sizeId === sizeInput.sizeId)) {
+        toast.error("Size already added");
         return;
       }
       setFormData((prev) => ({
         ...prev,
-        howToUse: [...prev.howToUse, howToUseInput.trim()],
+        sizes: [
+          ...prev.sizes,
+          {
+            ...sizeInput,
+            sizeId: parseInt(sizeInput.sizeId),
+            originalPrice: parseFloat(sizeInput.originalPrice),
+            stock: parseInt(sizeInput.stock),
+          },
+        ],
       }));
-      setHowToUseInput("");
+      setSizeInput({ sizeId: "", name: "", originalPrice: "", stock: "" });
+    } else {
+      toast.error("Please fill all size fields (size, price, stock)");
     }
   };
 
-  const removeHowToUse = (index) => {
+  const removeSize = (index) => {
     setFormData((prev) => ({
       ...prev,
-      howToUse: prev.howToUse.filter((_, i) => i !== index),
+      sizes: prev.sizes.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addDetail = () => {
+    if (detailInput.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        details: [...prev.details, detailInput],
+      }));
+      setDetailInput("");
+    } else {
+      toast.error("Please enter a detail");
+    }
+  };
+
+  const removeDetail = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      details: prev.details.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addSizeFit = () => {
+    if (sizeFitInput.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        sizeFit: [...prev.sizeFit, sizeFitInput],
+      }));
+      setSizeFitInput("");
+    } else {
+      toast.error("Please enter size & fit info");
+    }
+  };
+
+  const removeSizeFit = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      sizeFit: prev.sizeFit.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addMaterialCare = () => {
+    if (materialCareInput.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        materialCare: [...prev.materialCare, materialCareInput],
+      }));
+      setMaterialCareInput("");
+    } else {
+      toast.error("Please enter material & care info");
+    }
+  };
+
+  const removeMaterialCare = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      materialCare: prev.materialCare.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addShippingReturn = () => {
+    if (shippingReturnInput.trim()) {
+      setFormData((prev) => ({
+        ...prev,
+        shippingReturn: [...prev.shippingReturn, shippingReturnInput],
+      }));
+      setShippingReturnInput("");
+    } else {
+      toast.error("Please enter shipping & return info");
+    }
+  };
+
+  const removeShippingReturn = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      shippingReturn: prev.shippingReturn.filter((_, i) => i !== index),
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate required fields
-    if (!product && formData.howToUse.length === 0) {
-      toast.error("At least one How to Use item is required");
-      return;
-    }
-    if (!product && formData.features.length === 0) {
-      toast.error("At least one feature is required");
-      return;
-    }
-    if (!product && formData.images.length === 0) {
-      toast.error("At least one image is required");
-      return;
-    }
     if (
       !formData.name ||
+      !formData.basePrice ||
+      !formData.description ||
       !formData.categoryId ||
-      !formData.price ||
-      !formData.shortDescription ||
-      !formData.longDescription ||
-      !formData.suitableSurfaces ||
-      !formData.ingredients
+      !formData.images.length
     ) {
-      toast.error("All fields marked with * are required");
+      toast.error("Please fill all required fields (except colors and sizes)");
       return;
     }
 
     setIsSubmitting(true);
-
-    // Append all fields explicitly
     const formPayload = new FormData();
     formPayload.append("name", formData.name);
+    formPayload.append("basePrice", formData.basePrice);
+    formPayload.append("description", formData.description);
     formPayload.append("categoryId", formData.categoryId);
-    formPayload.append("price", formData.price);
-    formPayload.append("shortDescription", formData.shortDescription);
-    formPayload.append("longDescription", formData.longDescription);
-    formPayload.append("suitableSurfaces", formData.suitableSurfaces);
-    formPayload.append("stock", formData.stock.toString());
-    formPayload.append("features", JSON.stringify(formData.features));
-    formPayload.append("howToUse", JSON.stringify(formData.howToUse));
-    formPayload.append("volume", formData.volume || "");
-    formPayload.append("ingredients", formData.ingredients);
-    formPayload.append("scent", formData.scent || "");
-    formPayload.append("phLevel", formData.phLevel || "");
-    formPayload.append("shelfLife", formData.shelfLife || "");
-    formPayload.append("madeIn", formData.madeIn || "");
-    formPayload.append("packaging", formData.packaging || "");
-    formPayload.append("combos", formData.combos.toString());
-
-    formData.images.forEach((image) => {
-      formPayload.append("images", image);
-    });
-
-    for (let pair of formPayload.entries()) {
-      console.log(
-        `${pair[0]}: ${pair[1] instanceof File ? "[File Object]" : pair[1]}`
-      );
-    }
+    formPayload.append("collectionId", formData.collectionId);
+    formPayload.append("details", JSON.stringify(formData.details));
+    formPayload.append("sizeFit", JSON.stringify(formData.sizeFit));
+    formPayload.append("materialCare", JSON.stringify(formData.materialCare));
+    formPayload.append(
+      "shippingReturn",
+      JSON.stringify(formData.shippingReturn)
+    );
+    formData.images.forEach((image) => formPayload.append("images", image));
+    formPayload.append(
+      "colors",
+      JSON.stringify(formData.colors.map((c) => ({ colorId: c.colorId })))
+    ); // Only send colorId to backend
+    formPayload.append("sizes", JSON.stringify(formData.sizes));
 
     try {
       if (product) {
         await axios.put(
-          `${USER_BASE_URL}/api/products/${product.id}`,
+          `${USER_BASE_URL}/products/${product.id}`,
           formPayload,
           {
             headers: {
@@ -246,25 +327,17 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
         );
         toast.success("Product Updated");
       } else {
-        const response = await axios.post(
-          `${USER_BASE_URL}/api/products`,
-          formPayload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("Server response:", response.data);
+        await axios.post(`${USER_BASE_URL}/products`, formPayload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         toast.success("Product Added");
       }
       refreshProducts();
       onClose();
     } catch (error) {
-      console.error(
-        "Error saving product:",
-        error.response?.data || error.message
-      );
+      console.error("Error saving product:", error.response?.data || error);
       toast.error(error.response?.data?.message || "Failed to save product");
     } finally {
       setIsSubmitting(false);
@@ -282,9 +355,9 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 cursor-pointer"
           >
-            <XMarkIcon className="h-6 w-6 cursor-pointer" />
+            <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
 
@@ -303,7 +376,24 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 required
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Base Price *
+              </label>
+              <input
+                type="number"
+                name="basePrice"
+                value={formData.basePrice}
+                onChange={handleInputChange}
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+                required
+              />
+            </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Category *
@@ -312,7 +402,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 name="categoryId"
                 value={formData.categoryId}
                 onChange={handleInputChange}
-                className="w-full px-2 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
                 required
               >
                 <option value="">Select Category</option>
@@ -323,61 +413,33 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 ))}
               </select>
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price *
+                Collection
               </label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
+              <select
+                name="collectionId"
+                value={formData.collectionId}
                 onChange={handleInputChange}
-                step="0.01"
-                min="0"
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stock
-              </label>
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleInputChange}
-                min="0"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              />
+              >
+                <option value="">Select Collection</option>
+                {collections.map((collection) => (
+                  <option key={collection.id} value={collection.id}>
+                    {collection.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Short Description *
+              Description *
             </label>
             <textarea
-              name="shortDescription"
-              value={formData.shortDescription}
-              onChange={handleInputChange}
-              rows={2}
-              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Long Description *
-            </label>
-            <textarea
-              name="longDescription"
-              value={formData.longDescription}
+              name="description"
+              value={formData.description}
               onChange={handleInputChange}
               rows={4}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
@@ -387,38 +449,38 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Features {product ? "(Optional)" : "*"}
+              Details
             </label>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
-                value={featureInput}
-                onChange={(e) => setFeatureInput(e.target.value)}
-                placeholder="Add feature"
+                value={detailInput}
+                onChange={(e) => setDetailInput(e.target.value)}
+                placeholder="Add a detail"
                 className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
               />
               <button
                 type="button"
-                onClick={addFeature}
+                onClick={addDetail}
                 className="px-4 py-2 bg-[#527557] text-white rounded-md cursor-pointer"
               >
                 Add
               </button>
             </div>
-            {formData.features.length === 0 && (
-              <p className="text-sm text-gray-500">No features added yet.</p>
+            {formData.details.length === 0 && (
+              <p className="text-sm text-gray-500">No details added yet.</p>
             )}
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {formData.features.map((feature, index) => (
+              {formData.details.map((detail, index) => (
                 <div
                   key={index}
                   className="flex justify-between items-center bg-gray-50 p-2 rounded"
                 >
-                  <span>{feature}</span>
+                  <span>{detail}</span>
                   <button
                     type="button"
-                    onClick={() => removeFeature(index)}
-                    className="text-red-500 hover:text-red-700"
+                    onClick={() => removeDetail(index)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
                   >
                     Remove
                   </button>
@@ -429,31 +491,31 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              How to Use {product ? "(Optional)" : "*"}
+              Size & Fit
             </label>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
-                value={howToUseInput}
-                onChange={(e) => setHowToUseInput(e.target.value)}
-                placeholder="Add how to use item"
+                value={sizeFitInput}
+                onChange={(e) => setSizeFitInput(e.target.value)}
+                placeholder="Add size & fit info"
                 className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
               />
               <button
                 type="button"
-                onClick={addHowToUse}
+                onClick={addSizeFit}
                 className="px-4 py-2 bg-[#527557] text-white rounded-md cursor-pointer"
               >
                 Add
               </button>
             </div>
-            {formData.howToUse.length === 0 && (
+            {formData.sizeFit.length === 0 && (
               <p className="text-sm text-gray-500">
-                No how to use items added yet.
+                No size & fit info added yet.
               </p>
             )}
             <div className="space-y-2 max-h-40 overflow-y-auto">
-              {formData.howToUse.map((item, index) => (
+              {formData.sizeFit.map((item, index) => (
                 <div
                   key={index}
                   className="flex justify-between items-center bg-gray-50 p-2 rounded"
@@ -461,8 +523,8 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                   <span>{item}</span>
                   <button
                     type="button"
-                    onClick={() => removeHowToUse(index)}
-                    className="text-red-500 hover:text-red-700"
+                    onClick={() => removeSizeFit(index)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
                   >
                     Remove
                   </button>
@@ -471,146 +533,267 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Suitable Surfaces *
-              </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Material & Care
+            </label>
+            <div className="flex gap-2 mb-2">
               <input
                 type="text"
-                name="suitableSurfaces"
-                value={formData.suitableSurfaces}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-                required
+                value={materialCareInput}
+                onChange={(e) => setMaterialCareInput(e.target.value)}
+                placeholder="Add material & care info"
+                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
               />
+              <button
+                type="button"
+                onClick={addMaterialCare}
+                className="px-4 py-2 bg-[#527557] text-white rounded-md cursor-pointer"
+              >
+                Add
+              </button>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Volume
-              </label>
-              <input
-                type="number"
-                name="volume"
-                value={formData.volume}
-                onChange={handleInputChange}
-                step="0.01"
-                min="0"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ingredients *
-              </label>
-              <input
-                type="text"
-                name="ingredients"
-                value={formData.ingredients}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Scent
-              </label>
-              <input
-                type="text"
-                name="scent"
-                value={formData.scent}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                pH Level
-              </label>
-              <input
-                type="number"
-                name="phLevel"
-                value={formData.phLevel}
-                onChange={handleInputChange}
-                step="0.1"
-                min="0"
-                max="14"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Shelf Life (months)
-              </label>
-              <input
-                type="number"
-                name="shelfLife"
-                value={formData.shelfLife}
-                onChange={handleInputChange}
-                min="0"
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Made In
-              </label>
-              <input
-                type="text"
-                name="madeIn"
-                value={formData.madeIn}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Packaging
-              </label>
-              <input
-                type="text"
-                name="packaging"
-                value={formData.packaging}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Combos
-              </label>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="combos"
-                  checked={formData.combos}
-                  onChange={handleInputChange}
-                  className="h-5 w-5 text-[#527557] focus:ring-[#527557] border-gray-300 rounded"
-                />
-                <span className="ml-2 text-sm text-gray-700">Combos</span>
-              </div>
+            {formData.materialCare.length === 0 && (
+              <p className="text-sm text-gray-500">
+                No material & care info added yet.
+              </p>
+            )}
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {formData.materialCare.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center bg-gray-50 p-2 rounded"
+                >
+                  <span>{item}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeMaterialCare(index)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product Images {product ? "(Optional for update)" : "*"}
+              Shipping & Return
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={shippingReturnInput}
+                onChange={(e) => setShippingReturnInput(e.target.value)}
+                placeholder="Add shipping & return info"
+                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+              />
+              <button
+                type="button"
+                onClick={addShippingReturn}
+                className="px-4 py-2 bg-[#527557] text-white rounded-md cursor-pointer"
+              >
+                Add
+              </button>
+            </div>
+            {formData.shippingReturn.length === 0 && (
+              <p className="text-sm text-gray-500">
+                No shipping & return info added yet.
+              </p>
+            )}
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {formData.shippingReturn.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center bg-gray-50 p-2 rounded"
+                >
+                  <span>{item}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeShippingReturn(index)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Colors *
+            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <select
+                value={colorInput.colorId}
+                onChange={(e) => {
+                  const selectedColorId = e.target.value;
+                  const selectedColor = availableColors.find(
+                    (c) => c.id.toString() === selectedColorId
+                  );
+                  setColorInput({
+                    colorId: selectedColorId,
+                    hexCode: selectedColor ? selectedColor.hexCode : "",
+                    name: selectedColor ? selectedColor.name : "",
+                  });
+                }}
+                className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+              >
+                <option value="">Select Color</option>
+                {availableColors.length > 0 ? (
+                  availableColors.map((color) => (
+                    <option key={color.id} value={color.id}>
+                      {color.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No colors available
+                  </option>
+                )}
+              </select>
+              {/* Color swatch preview */}
+              <div
+                className="w-10 h-10 rounded border"
+                style={{
+                  backgroundColor: colorInput.hexCode || "#FFFFFF",
+                }}
+              />
+              <button
+                type="button"
+                onClick={addColor}
+                className="px-4 py-2 bg-[#527557] text-white rounded-md cursor-pointer"
+              >
+                Add
+              </button>
+            </div>
+            {formData.colors.length === 0 && (
+              <p className="text-sm text-gray-500">No colors added yet.</p>
+            )}
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {formData.colors.map((color, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center bg-gray-50 p-2 rounded"
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-10 h-10 rounded border"
+                      style={{ backgroundColor: color.hexCode || "#FFFFFF" }}
+                    />
+                    <span>{color.name || "Unnamed Color"}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeColor(index)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sizes *
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+              <select
+                value={sizeInput.sizeId}
+                onChange={(e) => {
+                  const selectedSizeId = e.target.value;
+                  const selectedSize = availableSizes.find(
+                    (s) => s.id.toString() === selectedSizeId
+                  );
+                  setSizeInput({
+                    ...sizeInput,
+                    sizeId: selectedSizeId,
+                    name: selectedSize ? selectedSize.name : "",
+                  });
+                }}
+                className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+              >
+                <option value="">Select Size</option>
+                {availableSizes.length > 0 ? (
+                  availableSizes.map((size) => (
+                    <option key={size.id} value={size.id}>
+                      {size.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value="" disabled>
+                    No sizes available
+                  </option>
+                )}
+              </select>
+              <input
+                type="number"
+                placeholder="Price"
+                value={sizeInput.originalPrice}
+                onChange={(e) =>
+                  setSizeInput({ ...sizeInput, originalPrice: e.target.value })
+                }
+                step="0.01"
+                min="0"
+                className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+              />
+              <input
+                type="number"
+                placeholder="Stock"
+                value={sizeInput.stock}
+                onChange={(e) =>
+                  setSizeInput({ ...sizeInput, stock: e.target.value })
+                }
+                min="0"
+                className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+              />
+              <button
+                type="button"
+                onClick={addSize}
+                className="px-4 py-2 bg-[#527557] text-white rounded-md cursor-pointer"
+              >
+                Add
+              </button>
+            </div>
+            {formData.sizes.length === 0 && (
+              <p className="text-sm text-gray-500">No sizes added yet.</p>
+            )}
+            <div className="space-y-2 max-h-40 overflow-y-auto">
+              {formData.sizes.map((size, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center bg-gray-50 p-2 rounded"
+                >
+                  <span>
+                    {size.name || "Unnamed Size"} - ₹{size.originalPrice}{" "}
+                    (Stock: {size.stock})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeSize(index)}
+                    className="text-red-500 hover:text-red-700 cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Product Images *
             </label>
             <input
               type="file"
               accept="image/*"
               multiple
               onChange={handleImagesChange}
-              className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#5275574d] file:text-[#527557] file:cursor-pointer"
+              className="block text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-green-100 file:text-[#527557] file:cursor-pointer"
             />
             {previewImages.length > 0 && (
               <div className="mt-2 flex gap-2 flex-wrap">
@@ -638,7 +821,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
               type="submit"
               disabled={isSubmitting}
               className={`px-4 py-2 rounded-md text-white cursor-pointer ${
-                isSubmitting ? "bg-[#8aa7ff]" : "bg-[#527557] "
+                isSubmitting ? "bg-gray-400" : "bg-[#527557]"
               }`}
             >
               {isSubmitting ? "Saving..." : "Save Product"}

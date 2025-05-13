@@ -15,7 +15,7 @@ const Colors = () => {
   const [colors, setColors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentBlog, setCurrentBlog] = useState(null);
+  const [currentColor, setCurrentColor] = useState(null); // Renamed for clarity
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchColors = async () => {
@@ -35,7 +35,7 @@ const Colors = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
+    if (window.confirm("Are you sure you want to delete this color?")) {
       try {
         await axios.delete(`${USER_BASE_URL}/colors/${id}`, {
           headers: {
@@ -44,10 +44,15 @@ const Colors = () => {
         });
         fetchColors();
       } catch (error) {
-        console.error("Error deleting category:", error);
+        console.error("Error deleting color:", error);
       }
     }
   };
+
+  // Filter colors based on search term
+  const filteredColors = colors.filter((color) =>
+    color.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto px-4 py-6 h-full">
@@ -67,7 +72,7 @@ const Colors = () => {
 
           <button
             onClick={() => {
-              setCurrentBlog(null);
+              setCurrentColor(null);
               setIsModalOpen(true);
             }}
             className="flex items-center justify-center gap-2 bg-[#527557] cursor-pointer text-white px-4 py-2 rounded-lg transition-colors"
@@ -82,34 +87,27 @@ const Colors = () => {
         <div className="flex justify-center items-center h-64">
           <ArrowPathIcon className="h-12 w-12 text-gray-400 animate-spin" />
         </div>
-      ) : colors.length === 0 ? (
+      ) : filteredColors.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-gray-500 text-lg">No colors found</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {colors.map((category) => (
+          {filteredColors.map((color) => (
             <div
-              key={category.id}
+              key={color.id}
               className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col"
             >
-              <div className=" overflow-hidden bg-gray-100">
-                {/* {category.image ? (
-                  <img
-                    src={`${USER_BASE_URL}${category.image}`}
-                    alt={category.name}
-                    className="w-full "
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                    No Image
-                  </div>
-                )} */}
-
+              <div className="h-32 overflow-hidden">
+                {/* Display color swatch using hexCode */}
+                <div
+                  className="w-full h-full"
+                  style={{ backgroundColor: color.hexCode || "#FFFFFF" }}
+                />
                 <div className="absolute top-3 right-3 flex space-x-2">
                   <button
                     onClick={() => {
-                      setCurrentBlog(category);
+                      setCurrentColor(color);
                       setIsModalOpen(true);
                     }}
                     className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-[#52755759] cursor-pointer"
@@ -117,7 +115,7 @@ const Colors = () => {
                     <PencilSquareIcon className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(category.id)}
+                    onClick={() => handleDelete(color.id)}
                     className="p-2 bg-white rounded-full shadow text-red-600 hover:bg-red-100 cursor-pointer"
                   >
                     <TrashIcon className="h-4 w-4" />
@@ -127,10 +125,10 @@ const Colors = () => {
 
               <div className="p-4 flex-grow flex flex-col justify-between">
                 <h3 className="text-lg font-semibold line-clamp-2">
-                  {category.name}
+                  {color.name}
                 </h3>
                 <p className="text-gray-600 text-sm line-clamp-3">
-                  {category.content}
+                  Hex: {color.hexCode || "N/A"}
                 </p>
               </div>
             </div>
@@ -141,7 +139,7 @@ const Colors = () => {
       <ColorsModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        color={currentBlog}
+        color={currentColor}
         refreshColors={fetchColors}
       />
     </div>

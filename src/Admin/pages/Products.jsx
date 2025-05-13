@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   PlusIcon,
   PencilSquareIcon,
@@ -13,7 +13,8 @@ import { toast } from "react-hot-toast";
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,25 +22,39 @@ const Products = () => {
 
   // Fetch products
   const fetchProducts = async () => {
+    if (!token) {
+      setError("Please log in to view products");
+      toast.error("Authentication required");
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await axios.get(`${USER_BASE_URL}/api/products`, {
+      setError(null);
+      const response = await axios.get(`${USER_BASE_URL}/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      // Backend returns images as array, no parsing needed
       const parsedProducts = response.data.map((product) => ({
         ...product,
-        images:
-          typeof product.images === "string"
-            ? JSON.parse(product.images)
-            : product.images || [],
+        images: product.images || [],
+        Colors: product.Colors || [],
+        Sizes: product.Sizes || [],
+        Category: product.Category || { name: "-" },
+        Collection: product.Collection || { name: "-" }, // Add Collection
       }));
+
+      console.log(parsedProducts);
 
       setProducts(parsedProducts);
       setFilteredProducts(parsedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
-      toast.error("Failed to load products");
+      const message =
+        error.response?.data?.message || "Failed to load products";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -51,11 +66,16 @@ const Products = () => {
 
   // Filter products based on search term
   useEffect(() => {
-    const filtered = products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (product.category &&
-          product.category.toLowerCase().includes(searchTerm.toLowerCase()))
+    const filtered = products.filter((product) =>
+      [
+        product.name,
+        product.Category?.name,
+        product.Collection?.name, // Add Collection to search
+        product.description,
+        product.basePrice?.toString(),
+      ]
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(searchTerm.toLowerCase()))
     );
     setFilteredProducts(filtered);
   }, [searchTerm, products]);
@@ -64,7 +84,7 @@ const Products = () => {
   const handleDelete = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        await axios.delete(`${USER_BASE_URL}/api/products/${productId}`, {
+        await axios.delete(`${USER_BASE_URL}/products/${productId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Product deleted");
@@ -78,6 +98,11 @@ const Products = () => {
     }
   };
 
+  // Retry fetch on error
+  const handleRetry = () => {
+    fetchProducts();
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -87,8 +112,8 @@ const Products = () => {
           <div className="relative flex-grow">
             <input
               type="text"
-              placeholder="Search products..."
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#527557] cursor-pointer"
+              placeholder="Search by name, category, collection, description, or price..."
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#527557]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -99,7 +124,7 @@ const Products = () => {
               setCurrentProduct(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center justify-center gap-2 bg-[#527557] text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-2 bg-[#527557] text-white px-4 py-2 rounded-lg transition-colors"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Add Product</span>
@@ -107,7 +132,18 @@ const Products = () => {
         </div>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="text-center py-10">
+          <p className="text-red-500 text-lg">{error}</p>
+          <button
+            onClick={handleRetry}
+            className="mt-4 flex items-center justify-center gap-2 bg-[#527557] text-white px-4 py-2 rounded-lg mx-auto"
+          >
+            <ArrowPathIcon className="h-5 w-5" />
+            <span>Retry</span>
+          </button>
+        </div>
+      ) : loading ? (
         <div className="flex justify-center items-center h-64">
           <ArrowPathIcon className="h-12 w-12 text-gray-400 animate-spin" />
         </div>
@@ -130,7 +166,19 @@ const Products = () => {
                   Category
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Short Description
+                  Collection
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Colors
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sizes
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Description
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -143,12 +191,15 @@ const Products = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     {product.images && product.images.length > 0 ? (
                       <img
-                        src={`${USER_BASE_URL}/${product.images[0]}`}
+                        src={`${USER_BASE_URL}${product.images[0]}`}
                         alt={product.name}
                         className="h-12 w-12 object-cover rounded"
                         onError={(e) => {
-                          e.target.style.display = "none"; // Hide broken image
-                          e.target.nextSibling.style.display = "flex"; // Show fallback
+                          console.error(
+                            `Failed to load image: ${e.target.src}`
+                          );
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "flex";
                         }}
                       />
                     ) : null}
@@ -169,12 +220,36 @@ const Products = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {product.category || "-"}
+                      {product.Category?.name || "-"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {product.Collection?.name || "-"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      ${product.basePrice || "-"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {product.Colors?.length > 0
+                        ? product.Colors.map((c) => c.name).join(", ")
+                        : "-"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {product.Sizes?.length > 0
+                        ? product.Sizes.map((s) => s.name).join(", ")
+                        : "-"}
                     </div>
                   </td>
                   <td className="px-4 py-4">
                     <div className="text-sm text-gray-500 line-clamp-2">
-                      {product.shortDescription}
+                      {product.description || "-"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -184,17 +259,21 @@ const Products = () => {
                           setCurrentProduct({
                             ...product,
                             images: product.images,
+                            Colors: product.Colors,
+                            Sizes: product.Sizes,
+                            categoryId: product.categoryId,
+                            collectionId: product.collectionId,
                           });
                           setIsModalOpen(true);
                         }}
-                        className="text-[#527557] cursor-pointer"
+                        className="text-[#527557]"
                         title="Edit"
                       >
                         <PencilSquareIcon className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(product.id)}
-                        className="text-red-600 cursor-pointer"
+                        className="text-red-600"
                         title="Delete"
                       >
                         <TrashIcon className="h-5 w-5" />
@@ -213,6 +292,7 @@ const Products = () => {
         onClose={() => setIsModalOpen(false)}
         product={currentProduct}
         refreshProducts={fetchProducts}
+        token={token}
       />
     </div>
   );

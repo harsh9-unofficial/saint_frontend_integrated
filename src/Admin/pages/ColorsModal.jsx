@@ -3,26 +3,39 @@ import axios from "axios";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { USER_BASE_URL } from "../../config";
 import { toast } from "react-hot-toast";
+import { SketchPicker } from "react-color"; // Import color picker
 
 const ColorsModal = ({ isOpen, onClose, color, refreshColors }) => {
   const token = localStorage.getItem("token");
 
   const [formData, setFormData] = useState({
     name: "",
+    hexCode: "#000000", // Default hex code
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false); // Toggle color picker visibility
 
   useEffect(() => {
     if (color) {
-      setFormData({ name: color.name });
+      setFormData({
+        name: color.name,
+        hexCode: color.hexCode || "#000000", // Use existing hexCode or default
+      });
     } else {
-      setFormData({ name: "" });
+      setFormData({
+        name: "",
+        hexCode: "#000000",
+      });
     }
   }, [color]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleColorChange = (color) => {
+    setFormData((prev) => ({ ...prev, hexCode: color.hex }));
   };
 
   const handleSubmit = async (e) => {
@@ -78,6 +91,7 @@ const ColorsModal = ({ isOpen, onClose, color, refreshColors }) => {
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Name Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Name *
@@ -90,6 +104,44 @@ const ColorsModal = ({ isOpen, onClose, color, refreshColors }) => {
                 className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
                 required
               />
+            </div>
+
+            {/* Color Picker Field */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Color *
+              </label>
+              <div className="flex items-center gap-3">
+                {/* Color Preview Swatch */}
+                <div
+                  className="w-10 h-10 rounded-md border cursor-pointer"
+                  style={{ backgroundColor: formData.hexCode }}
+                  onClick={() => setShowColorPicker((prev) => !prev)}
+                />
+                {/* Hex Code Input */}
+                <input
+                  type="text"
+                  name="hexCode"
+                  value={formData.hexCode}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
+                  placeholder="#000000"
+                  required
+                />
+              </div>
+              {/* Color Picker (shown when swatch is clicked) */}
+              {showColorPicker && (
+                <div className="absolute z-10 mt-2">
+                  <div
+                    className="fixed inset-0"
+                    onClick={() => setShowColorPicker(false)}
+                  />
+                  <SketchPicker
+                    color={formData.hexCode}
+                    onChangeComplete={handleColorChange}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

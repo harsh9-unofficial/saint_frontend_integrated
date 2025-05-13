@@ -104,12 +104,12 @@ const Collections = () => {
                 key={collection.id}
                 className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col min-h-[300px]"
               >
-                <div className="overflow-hidden bg-gray-100 h-74">
+                <div className="overflow-hidden bg-gray-100 h-72">
                   {collection.images && collection.images.length > 0 ? (
                     <img
                       src={`${USER_BASE_URL}/${collection.images[0]}`}
                       alt={collection.name}
-                      className="w-full"
+                      className="w-full h-full"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
