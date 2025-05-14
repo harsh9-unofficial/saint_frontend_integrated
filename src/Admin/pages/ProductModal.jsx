@@ -74,7 +74,6 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
   // Initialize form when product changes
   useEffect(() => {
-    // console.log("Product prop in ProductModal:", product);
     if (product) {
       setFormData({
         name: product.name || "",
@@ -99,11 +98,18 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
           })) || [],
         sizes:
           product.ProductSizes?.map((size) => ({
-            sizeId: size.id, // Directly use size.id since Sizes contains Size objects
+            sizeId: size.sizeId || size.id, // Handle both updateProduct and createProduct
             name: size.name || "",
             originalPrice: size.originalPrice || "",
             stock: size.stock || "",
-          })) || [],
+          })) ||
+          product.Sizes?.map((size) => ({
+            sizeId: size.id, // From Size model
+            name: size.name || "",
+            originalPrice: size.ProductSize?.originalPrice || "",
+            stock: size.ProductSize?.stock || "",
+          })) ||
+          [],
       });
       setPreviewImages(
         product.images?.map((img) => `${USER_BASE_URL}${img}`) || []
@@ -125,7 +131,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
       });
       setPreviewImages([]);
     }
-    setIsSubmitting(false); // Reset isSubmitting when modal opens or product changes
+    setIsSubmitting(false);
   }, [product]);
 
   const handleInputChange = (e) => {
@@ -300,7 +306,6 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("handleSubmit called");
 
     // Validate required fields
     const missingFields = [];
@@ -308,16 +313,10 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     if (!formData.basePrice) missingFields.push("Base Price");
     if (!formData.description) missingFields.push("Description");
     if (!formData.categoryId) missingFields.push("Category");
-    if (!product && !formData.images.length) missingFields.push("Images"); // Only require images for adding a new product
+    if (!product && !formData.images.length) missingFields.push("Images");
+    if (!formData.sizes.length) missingFields.push("Sizes"); // Require at least one size
 
     if (missingFields.length > 0) {
-      console.log("Validation failed:", {
-        name: formData.name,
-        basePrice: formData.basePrice,
-        description: formData.description,
-        categoryId: formData.categoryId,
-        imagesLength: formData.images.length,
-      });
       toast.error(
         `Please fill the following required fields: ${missingFields.join(", ")}`
       );
@@ -347,36 +346,31 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
         formData.colors.map((c) => ({ colorId: c.colorId, name: c.name }))
       )
     );
-    formPayload.append("sizes", JSON.stringify(formData.sizes));
-
-    console.log("FormData contents:");
-    for (let [key, value] of formPayload.entries()) {
-      console.log(`${key}:`, value);
-    }
+    formPayload.append(
+      "sizes",
+      JSON.stringify(
+        formData.sizes.map((s) => ({
+          sizeId: parseInt(s.sizeId),
+          name: s.name,
+          originalPrice: parseFloat(s.originalPrice),
+          stock: parseInt(s.stock),
+        }))
+      )
+    );
 
     try {
       if (product) {
-        console.log(
-          "Sending PUT request to:",
-          `${USER_BASE_URL}/products/${product.id}`,
-          formPayload
-        );
         await axios.put(
           `${USER_BASE_URL}/products/${product.id}`,
           formPayload,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
         toast.success("Product Updated");
       } else {
-        console.log("Sending POST request to:", `${USER_BASE_URL}/products`);
         await axios.post(`${USER_BASE_URL}/products`, formPayload, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Product Added");
       }
@@ -384,7 +378,6 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
       onClose();
     } catch (error) {
       console.error("Error saving product:", error.response?.data || error);
-      console.error("Full error object:", error);
       toast.error(error.response?.data?.message || "Failed to save product");
     } finally {
       setIsSubmitting(false);
