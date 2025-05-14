@@ -55,7 +55,7 @@ const Sidebar = ({ onClose }) => {
             onClick={handleNavClick}
             end={item.path === "/admin"}
             className={({ isActive }) =>
-              `group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+              `group flex items-center px-2 py-2 text-base font-medium rounded-md ${
                 isActive
                   ? "bg-[#52755750] text-[#527557]"
                   : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"

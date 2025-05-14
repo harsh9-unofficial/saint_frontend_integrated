@@ -62,8 +62,8 @@ const CategoryModal = ({ isOpen, onClose, category, refreshCategories }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center border-b p-4">
           <h2 className="text-xl font-semibold">
             {category ? "Edit Category" : "Add New Category"}
@@ -77,7 +77,7 @@ const CategoryModal = ({ isOpen, onClose, category, refreshCategories }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Name *
