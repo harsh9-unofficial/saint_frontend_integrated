@@ -22,7 +22,6 @@ const Collections = () => {
     try {
       setLoading(true);
       const response = await axios.get(`${USER_BASE_URL}/collections`);
-      console.log(response.data);
 
       // Parse the images field for each collection
       const parsedCollections = response.data.map((collection) => ({
@@ -94,7 +93,7 @@ const Collections = () => {
           <p className="text-gray-500 text-lg">No collections found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
           {collections
             .filter((collection) =>
               collection.name.toLowerCase().includes(searchTerm.toLowerCase())

@@ -92,7 +92,7 @@ const Colors = () => {
           <p className="text-gray-500 text-lg">No colors found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-7 gap-4">
           {filteredColors.map((color) => (
             <div
               key={color.id}

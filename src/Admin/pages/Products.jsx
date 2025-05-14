@@ -14,14 +14,16 @@ import { toast } from "react-hot-toast";
 const ProductDetailsModal = ({ isOpen, onClose, product }) => {
   if (!isOpen || !product) return null;
 
+  console.log("Product received in ProductDetailsModal:", product);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">{product.name}</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 cursor-pointer"
           >
             <svg
               className="h-6 w-6"
@@ -66,7 +68,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             <h3 className="text-sm font-medium text-gray-700">Colors</h3>
             <p className="text-gray-500">
               {product.ProductColors.length > 0
-                ? product.ProductColors.map((c) => c.Color.name).join(", ")
+                ? product.ProductColors.map((c) => c.name).join(", ")
                 : "-"}
             </p>
           </div>
@@ -94,7 +96,9 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500">-</p>
+              <p className="text-gray-500">
+                No details available for this product.
+              </p>
             )}
           </div>
           <div>
@@ -106,7 +110,9 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500">-</p>
+              <p className="text-gray-500">
+                No size & fit information available.
+              </p>
             )}
           </div>
           <div>
@@ -120,7 +126,9 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500">-</p>
+              <p className="text-gray-500">
+                No material & care information available.
+              </p>
             )}
           </div>
           <div>
@@ -134,14 +142,16 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
                 ))}
               </ul>
             ) : (
-              <p className="text-gray-500">-</p>
+              <p className="text-gray-500">
+                No shipping & return information available.
+              </p>
             )}
           </div>
         </div>
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-[#527557] text-white rounded-lg hover:bg-[#426146]"
+            className="px-4 py-2 bg-[#527557] text-white rounded-lg hover:bg-[#426146] cursor-pointer"
           >
             Close
           </button>
@@ -177,24 +187,36 @@ const Products = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log(response.data);
+      // console.log("Response from API", response.data);
 
-      const parsedProducts = response.data.map((product) => ({
-        ...product,
-        images: product.images || [],
-        Colors: product.Colors || [],
-        Sizes: product.Sizes || [],
-        Category: product.Category || { name: "-" },
-        Collection: product.Collection || { name: "-" },
-        details: Array.isArray(product.details) ? product.details : [],
-        sizeFit: Array.isArray(product.sizeFit) ? product.sizeFit : [],
-        materialCare: Array.isArray(product.materialCare)
-          ? product.materialCare
-          : [],
-        shippingReturn: Array.isArray(product.shippingReturn)
-          ? product.shippingReturn
-          : [],
-      }));
+      const parsedProducts = response.data.map((product) => {
+        // Helper function to parse JSON string into array, with fallback to empty array
+        const parseArray = (data) => {
+          try {
+            if (typeof data === "string") {
+              const parsed = JSON.parse(data);
+              return Array.isArray(parsed) ? parsed : [];
+            }
+            return Array.isArray(data) ? data : [];
+          } catch (error) {
+            console.error("Error parsing JSON:", error, "Data:", data);
+            return [];
+          }
+        };
+
+        return {
+          ...product,
+          images: product.images || [],
+          Colors: product.Colors || [],
+          Sizes: product.Sizes || [],
+          Category: product.Category || { name: "-" },
+          Collection: product.Collection || { name: "-" },
+          details: parseArray(product.details),
+          sizeFit: parseArray(product.sizeFit),
+          materialCare: parseArray(product.materialCare),
+          shippingReturn: parseArray(product.shippingReturn),
+        };
+      });
 
       setProducts(parsedProducts);
       setFilteredProducts(parsedProducts);
@@ -273,7 +295,7 @@ const Products = () => {
               setCurrentProduct(null);
               setIsModalOpen(true);
             }}
-            className="flex items-center justify-center gap-2 bg-[#527557] text-white px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 bg-[#527557] text-white px-4 py-2 rounded-lg transition-colors cursor-pointer"
           >
             <PlusIcon className="h-5 w-5" />
             <span>Add Product</span>
@@ -323,8 +345,14 @@ const Products = () => {
                 <div className="absolute top-3 right-3 flex flex-col space-y-2">
                   <button
                     onClick={() => {
+                      console.log(
+                        "Product being set to currentProduct:",
+                        product
+                      );
                       setCurrentProduct(product);
-                      setIsDetailsModalOpen(true);
+                      setTimeout(() => {
+                        setIsDetailsModalOpen(true);
+                      }, 0);
                     }}
                     className="p-2 bg-white rounded-full shadow text-blue-600 hover:bg-blue-50 cursor-pointer"
                     title="View Details"
@@ -333,7 +361,7 @@ const Products = () => {
                   </button>
                   <button
                     onClick={() => {
-                      setCurrentProduct(product); // Pass the full product object
+                      setCurrentProduct(product);
                       setIsModalOpen(true);
                     }}
                     className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-indigo-50 cursor-pointer"

@@ -15,7 +15,7 @@ const Reviews = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`${USER_BASE_URL}/api/ratings`);
+      const response = await axios.get(`${USER_BASE_URL}/ratings`);
       setReviews(response.data);
     } catch (err) {
       setError(
@@ -25,7 +25,7 @@ const Reviews = () => {
       console.error("Error fetching reviews:", err);
     } finally {
       setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const Reviews = () => {
     if (window.confirm("Are you sure you want to delete this review?")) {
       try {
         const response = await axios.delete(
-          `${USER_BASE_URL}/api/ratings/${reviewId}`
+          `${USER_BASE_URL}/ratings/${reviewId}`
         );
         if (response.status === 200) {
           fetchReviews();
@@ -126,7 +126,7 @@ const Reviews = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {review.User?.fullName || "Anonymous"}
+                      {review.User?.username || "Anonymous"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

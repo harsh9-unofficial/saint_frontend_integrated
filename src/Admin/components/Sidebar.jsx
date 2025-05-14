@@ -53,6 +53,7 @@ const Sidebar = ({ onClose }) => {
             key={item.name}
             to={item.path}
             onClick={handleNavClick}
+            end={item.path === "/admin"}
             className={({ isActive }) =>
               `group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                 isActive

@@ -33,7 +33,6 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
   });
   const [sizeInput, setSizeInput] = useState({
     sizeId: "",
-    name: "",
     originalPrice: "",
     stock: "",
   });
@@ -75,7 +74,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
   // Initialize form when product changes
   useEffect(() => {
-    console.log("Product prop in ProductModal:", product); // Debug
+    // console.log("Product prop in ProductModal:", product);
     if (product) {
       setFormData({
         name: product.name || "",
@@ -85,24 +84,30 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
         collectionId: product.collectionId || "",
         details: Array.isArray(product.details) ? product.details : [],
         sizeFit: Array.isArray(product.sizeFit) ? product.sizeFit : [],
-        materialCare: Array.isArray(product.materialCare) ? product.materialCare : [],
-        shippingReturn: Array.isArray(product.shippingReturn) ? product.shippingReturn : [],
+        materialCare: Array.isArray(product.materialCare)
+          ? product.materialCare
+          : [],
+        shippingReturn: Array.isArray(product.shippingReturn)
+          ? product.shippingReturn
+          : [],
         images: [],
         colors:
-          product.Colors?.map((color) => ({
-            colorId: color.id,
-            hexCode: color.hexCode || "",
-            name: color.name || "",
+          product.ProductColors?.map((color) => ({
+            colorId: color.Color.id,
+            hexCode: color.Color.hexCode || "",
+            name: color.Color.name || "",
           })) || [],
         sizes:
-          product.Sizes?.map((size) => ({
-            sizeId: size.id,
+          product.ProductSizes?.map((size) => ({
+            sizeId: size.id, // Directly use size.id since Sizes contains Size objects
             name: size.name || "",
             originalPrice: size.originalPrice || "",
             stock: size.stock || "",
           })) || [],
       });
-      setPreviewImages(product.images?.map((img) => `${USER_BASE_URL}${img}`) || []);
+      setPreviewImages(
+        product.images?.map((img) => `${USER_BASE_URL}${img}`) || []
+      );
     } else {
       setFormData({
         name: "",
@@ -120,6 +125,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
       });
       setPreviewImages([]);
     }
+    setIsSubmitting(false); // Reset isSubmitting when modal opens or product changes
   }, [product]);
 
   const handleInputChange = (e) => {
@@ -172,27 +178,38 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
   const addSize = () => {
     if (
       sizeInput.sizeId &&
-      sizeInput.name.trim() &&
       sizeInput.originalPrice !== "" &&
       sizeInput.stock !== ""
     ) {
-      if (formData.sizes.some((s) => s.sizeId === sizeInput.sizeId)) {
+      // Find the selected size to get its name
+      const selectedSize = availableSizes.find(
+        (s) => s.id.toString() === sizeInput.sizeId
+      );
+
+      if (!selectedSize) {
+        toast.error("Selected size not found");
+        return;
+      }
+
+      // Check for duplicate sizes
+      if (formData.sizes.some((s) => s.sizeId === parseInt(sizeInput.sizeId))) {
         toast.error("Size already added");
         return;
       }
+
       setFormData((prev) => ({
         ...prev,
         sizes: [
           ...prev.sizes,
           {
-            ...sizeInput,
             sizeId: parseInt(sizeInput.sizeId),
+            name: selectedSize.name, // Derive name from availableSizes
             originalPrice: parseFloat(sizeInput.originalPrice),
             stock: parseInt(sizeInput.stock),
           },
         ],
       }));
-      setSizeInput({ sizeId: "", name: "", originalPrice: "", stock: "" });
+      setSizeInput({ sizeId: "", originalPrice: "", stock: "" });
     } else {
       toast.error("Please fill all size fields (size, price, stock)");
     }
@@ -283,14 +300,27 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.basePrice ||
-      !formData.description ||
-      !formData.categoryId ||
-      !formData.images.length
-    ) {
-      toast.error("Please fill all required fields (except colors and sizes)");
+    console.log("handleSubmit called");
+
+    // Validate required fields
+    const missingFields = [];
+    if (!formData.name) missingFields.push("Name");
+    if (!formData.basePrice) missingFields.push("Base Price");
+    if (!formData.description) missingFields.push("Description");
+    if (!formData.categoryId) missingFields.push("Category");
+    if (!product && !formData.images.length) missingFields.push("Images"); // Only require images for adding a new product
+
+    if (missingFields.length > 0) {
+      console.log("Validation failed:", {
+        name: formData.name,
+        basePrice: formData.basePrice,
+        description: formData.description,
+        categoryId: formData.categoryId,
+        imagesLength: formData.images.length,
+      });
+      toast.error(
+        `Please fill the following required fields: ${missingFields.join(", ")}`
+      );
       return;
     }
 
@@ -300,7 +330,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     formPayload.append("basePrice", formData.basePrice);
     formPayload.append("description", formData.description);
     formPayload.append("categoryId", formData.categoryId);
-    formPayload.append("collectionId", formData.collectionId);
+    formPayload.append("collectionId", formData.collectionId || "");
     formPayload.append("details", JSON.stringify(formData.details));
     formPayload.append("sizeFit", JSON.stringify(formData.sizeFit));
     formPayload.append("materialCare", JSON.stringify(formData.materialCare));
@@ -308,15 +338,29 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
       "shippingReturn",
       JSON.stringify(formData.shippingReturn)
     );
-    formData.images.forEach((image) => formPayload.append("images", image));
+    if (formData.images.length > 0) {
+      formData.images.forEach((image) => formPayload.append("images", image));
+    }
     formPayload.append(
       "colors",
-      JSON.stringify(formData.colors.map((c) => ({ colorId: c.colorId })))
+      JSON.stringify(
+        formData.colors.map((c) => ({ colorId: c.colorId, name: c.name }))
+      )
     );
     formPayload.append("sizes", JSON.stringify(formData.sizes));
 
+    console.log("FormData contents:");
+    for (let [key, value] of formPayload.entries()) {
+      console.log(`${key}:`, value);
+    }
+
     try {
       if (product) {
+        console.log(
+          "Sending PUT request to:",
+          `${USER_BASE_URL}/products/${product.id}`,
+          formPayload
+        );
         await axios.put(
           `${USER_BASE_URL}/products/${product.id}`,
           formPayload,
@@ -328,6 +372,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
         );
         toast.success("Product Updated");
       } else {
+        console.log("Sending POST request to:", `${USER_BASE_URL}/products`);
         await axios.post(`${USER_BASE_URL}/products`, formPayload, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -339,6 +384,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
       onClose();
     } catch (error) {
       console.error("Error saving product:", error.response?.data || error);
+      console.error("Full error object:", error);
       toast.error(error.response?.data?.message || "Failed to save product");
     } finally {
       setIsSubmitting(false);
@@ -701,7 +747,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Sizes *
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
               <select
                 value={sizeInput.sizeId}
                 onChange={(e) => {
@@ -712,7 +758,6 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                   setSizeInput({
                     ...sizeInput,
                     sizeId: selectedSizeId,
-                    name: selectedSize ? selectedSize.name : "",
                   });
                 }}
                 className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
@@ -769,7 +814,8 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                   className="flex justify-between items-center bg-gray-50 p-2 rounded"
                 >
                   <span>
-                    {size.name || "Unnamed Size"} - ₹{size.originalPrice} (Stock: {size.stock})
+                    {size.name || "Unnamed Size"} - ₹{size.originalPrice}{" "}
+                    (Stock: {size.stock})
                   </span>
                   <button
                     type="button"
@@ -785,7 +831,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Product Images *
+              Product Images {product ? "" : "*"}
             </label>
             <input
               type="file"

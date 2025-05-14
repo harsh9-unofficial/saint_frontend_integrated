@@ -7,10 +7,6 @@ import {
   BookOpenIcon,
   PhoneIcon,
   FolderIcon,
-  UserIcon,
-  CalendarIcon,
-  EnvelopeIcon,
-  ChatBubbleLeftIcon,
 } from "@heroicons/react/24/outline";
 import {
   ListTree,
