@@ -47,7 +47,7 @@ const CollectionCard = () => {
             className="bg-white rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all duration-300"
           >
             <div className="relative">
-              <Link to="/singleproduct">
+              <Link to={`/singleproduct/${product.id}`}>
                 <img
                   src={product.image}
                   alt={product.title}
@@ -67,7 +67,7 @@ const CollectionCard = () => {
 
               <div className="flex justify-between items-center gap-2">
                 <button className="flex-1 bg-[#527557] text-[#F6F6F6] py-2 px-3 rounded cursor-pointer text-sm">
-                  <Link to="/singleproduct">View Details</Link>
+                  <Link to={`/singleproduct/${product.id}`}>View Details</Link>
                 </button>
                 <button className="p-2 border border-[#527557] bg-[#527557] rounded cursor-pointer">
                   <FiShoppingBag className="text-[#F6F6F6]" />

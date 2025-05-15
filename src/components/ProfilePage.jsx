@@ -1,10 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Profile");
   const [profilePic, setProfilePic] = useState("/images/Shirt.png");
   const [showTracking, setShowTracking] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Check for userId in localStorage when component mounts
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      // Redirect to login page if userId is not found
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleProfilePicChange = (event) => {
     const file = event.target.files[0];
@@ -81,6 +92,12 @@ export default function ProfilePage() {
       ],
     },
   ];
+
+  // Render nothing or a loading state while redirecting
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    return null; // or a loading spinner
+  }
 
   return (
     <div className="flex flex-col md:flex-row container mx-auto px-4 py-4 md:py-16">
@@ -233,11 +250,9 @@ export default function ProfilePage() {
                 </div>
               </section>
 
-              {/* <div> */}
               <button className="bg-[#527557] text-white cursor-pointer px-6 py-4">
                 Save Change
               </button>
-              {/* </div> */}
             </div>
           </>
         ) : (
@@ -276,13 +291,6 @@ export default function ProfilePage() {
                         {step.status}
                       </p>
                       <p className="text-xs text-gray-500">{step.date}</p>
-                      {/* {index < selectedOrder.tracking.length - 1 && (
-                        <div
-                          className={`sm:absolute sm:top-3 sm:left-10 sm:w-[calc(100%-2.5rem)] w-full h-0.5 mt-2 sm:mt-0 ${
-                            step.completed ? "bg-green-200" : "bg-gray-200"
-                          }`}
-                        ></div>
-                      )} */}
                     </div>
                   ))}
                 </div>
@@ -322,7 +330,7 @@ export default function ProfilePage() {
                 <div className="border-t pt-4">
                   <div className="flex justify-between mb-2">
                     <p className="text-sm font-semibold">
-                      Subtotal - {selectedOrder.items.length} items
+                      Subtotal - {selectedorder.items.length} items
                     </p>
                     <p className="text-sm font-semibold">
                       Rs.{" "}

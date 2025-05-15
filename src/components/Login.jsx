@@ -30,8 +30,10 @@ const Login = () => {
       // Store data based on isAdmin status
       if (response.data.isAdmin) {
         localStorage.setItem("isAdmin", response.data.isAdmin.toString());
+        localStorage.removeItem("userId");
       } else {
         localStorage.setItem("userId", response.data.user.id);
+        localStorage.removeItem("isAdmin");
       }
 
       // Redirect based on isAdmin status

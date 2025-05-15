@@ -133,7 +133,7 @@ const PublicLayout = () => {
         <Route path="/" element={<HomePage />} />
         {/* 01/05/2025 */}
         <Route path="/newarrivals" element={<NewArrivalsPage />} />
-        <Route path="/singleproduct" element={<SingleProduct />} />
+        <Route path="/singleproduct/:id" element={<SingleProduct />} />
         <Route path="/ourstory" element={<OurStoryPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

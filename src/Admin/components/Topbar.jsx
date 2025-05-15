@@ -11,7 +11,7 @@ const Topbar = ({ onMenuClick }) => {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate("/");
+    navigate("/login");
   };
 
   return (

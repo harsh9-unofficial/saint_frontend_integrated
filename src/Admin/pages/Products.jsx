@@ -14,8 +14,6 @@ import { toast } from "react-hot-toast";
 const ProductDetailsModal = ({ isOpen, onClose, product }) => {
   if (!isOpen || !product) return null;
 
-  console.log("Product received in ProductDetailsModal:", product);
-
   return (
     <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -187,10 +185,7 @@ const Products = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // console.log("Response from API", response.data);
-
       const parsedProducts = response.data.map((product) => {
-        // Helper function to parse JSON string into array, with fallback to empty array
         const parseArray = (data) => {
           try {
             if (typeof data === "string") {
@@ -345,10 +340,6 @@ const Products = () => {
                 <div className="absolute top-3 right-3 flex flex-col space-y-2">
                   <button
                     onClick={() => {
-                      console.log(
-                        "Product being set to currentProduct:",
-                        product
-                      );
                       setCurrentProduct(product);
                       setTimeout(() => {
                         setIsDetailsModalOpen(true);

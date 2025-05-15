@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LuSearch } from "react-icons/lu";
+import { LuSearch, LuX } from "react-icons/lu";
 import { CgShoppingBag } from "react-icons/cg";
 import { FiUser } from "react-icons/fi";
 import { RxCross1 } from "react-icons/rx";
@@ -8,22 +8,34 @@ import { Menu, ChevronDown } from "lucide-react";
 import Cart from "./Cart";
 import { toast } from "react-hot-toast";
 
+// Sample product data (replace with your API or actual data)
+const sampleProducts = [
+  { id: 1, name: "Classic Green Tee", price: 29999, image: "/images/Collection1.png" },
+  { id: 2, name: "Yellow Dress", price: 49999, image: "/images/Collection2.png" },
+  { id: 3, name: "Camo Jacket", price: 79999, image: "/images/Collection3.png" },
+  { id: 4, name: "Black Dress", price: 59999, image: "/images/Collection4.png" },
+];
+
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
   const [collectionOpen, setCollectionOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
 
   // Check token, userId, and isAdmin from localStorage
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
-  const isAdmin = localStorage.getItem("isAdmin") === "true"; // Convert string to boolean
+  const isAdmin = localStorage.getItem("isAdmin") === "true";
 
   const shopRef = useRef(null);
   const collectionRef = useRef(null);
   const cartRef = useRef(null);
   const userMenuRef = useRef(null);
+  const searchRef = useRef(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -37,11 +49,17 @@ const Header = () => {
       if (!collectionOpen) setShopOpen(false);
     }
     setUserMenuOpen(false);
+    setSearchOpen(false);
   };
 
   const toggleCart = () => {
+    if (!userId) {
+      toast.error("Please login for Add to Cart");
+      return;
+    }
     setCartOpen(!cartOpen);
     setUserMenuOpen(false);
+    setSearchOpen(false);
   };
 
   const toggleUserMenu = () => {
@@ -50,9 +68,52 @@ const Header = () => {
       setShopOpen(false);
       setCollectionOpen(false);
       setCartOpen(false);
+      setSearchOpen(false);
     } else {
       navigate("/login");
     }
+  };
+
+  const toggleSearch = () => {
+    setSearchOpen(!searchOpen);
+    setShopOpen(false);
+    setCollectionOpen(false);
+    setCartOpen(false);
+    setUserMenuOpen(false);
+    if (!searchOpen) {
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    // Perform search (replace with API call if available)
+    if (query.trim()) {
+      const filtered = sampleProducts.filter((product) =>
+        product.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setSearchResults(filtered);
+    } else {
+      setSearchResults([]);
+    }
+
+    // Example API call (uncomment and customize)
+    /*
+    if (query.trim()) {
+      fetch(`/api/products/search?q=${encodeURIComponent(query)}`)
+        .then((res) => res.json())
+        .then((data) => setSearchResults(data))
+        .catch((err) => {
+          console.error("Search error:", err);
+          toast.error("Failed to search products");
+        });
+    } else {
+      setSearchResults([]);
+    }
+    */
   };
 
   const handleLogout = () => {
@@ -67,6 +128,9 @@ const Header = () => {
     setCollectionOpen(false);
     setCartOpen(false);
     setUserMenuOpen(false);
+    setSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
   }, [location]);
 
   useEffect(() => {
@@ -77,13 +141,18 @@ const Header = () => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setUserMenuOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchOpen(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
     };
 
     const getScrollbarWidth = () => {
       return window.innerWidth - document.documentElement.clientWidth;
     };
 
-    if (cartOpen) {
+    if (cartOpen || searchOpen) {
       const scrollbarWidth = getScrollbarWidth();
       document.body.style.overflow = "hidden";
       document.body.style.paddingRight = `${scrollbarWidth}px`;
@@ -98,7 +167,7 @@ const Header = () => {
       document.body.style.paddingRight = "";
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [cartOpen, userMenuOpen]);
+  }, [cartOpen, userMenuOpen, searchOpen]);
 
   return (
     <header className="shadow-md relative top-0 z-50 bg-white">
@@ -255,7 +324,10 @@ const Header = () => {
 
         {/* Right icons */}
         <div className="flex items-center space-x-3">
-          <button className="hover:text-[#527557] cursor-pointer">
+          <button
+            onClick={toggleSearch}
+            className="hover:text-[#527557] cursor-pointer"
+          >
             <LuSearch className="text-[24px] lg:text-[26px]" />
           </button>
           <button
@@ -273,24 +345,13 @@ const Header = () => {
             </button>
             {userId && userMenuOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg border rounded-lg z-50">
-                {!isAdmin && (
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-gray-800 hover:bg-[#527557] rounded-t-lg hover:text-white"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                )}
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    className="block px-4 py-2 text-gray-800 hover:bg-[#527557] rounded-b-lg hover:text-white"
-                    onClick={() => setUserMenuOpen(false)}
-                  >
-                    Admin Dashboard
-                  </Link>
-                )}
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 text-gray-800 hover:bg-[#527557] rounded-t-lg hover:text-white"
+                  onClick={() => setUserMenuOpen(false)}
+                >
+                  Profile
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-[#527557] cursor-pointer hover:text-white"
@@ -306,6 +367,63 @@ const Header = () => {
           >
             {mobileOpen ? <RxCross1 size={24} /> : <Menu size={24} />}
           </button>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div
+        className={`fixed inset-0 z-50 transition-opacity duration-300 ${
+          searchOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={toggleSearch}
+        ></div>
+        <div
+          ref={searchRef}
+          className="relative bg-white w-full max-w-3xl mx-auto mt-16 md:mt-20 p-4 md:p-6 rounded-lg shadow-2xl"
+        >
+          <div className="flex items-center gap-2">
+            <LuSearch className="text-gray-500 text-xl" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search for products..."
+              className="flex-1 text-lg border-none focus:outline-none"
+              autoFocus
+            />
+            <button onClick={toggleSearch}>
+              <LuX className="text-gray-500 text-xl hover:text-[#527557]" />
+            </button>
+          </div>
+          <div className="border-t border-gray-200 mt-4 pt-4 max-h-96 overflow-y-auto">
+            {searchQuery.trim() && searchResults.length > 0 ? (
+              searchResults.map((product) => (
+                <Link
+                  key={product.id}
+                  to={`/product/${product.id}`}
+                  className="flex items-center gap-4 p-3 hover:bg-gray-100 rounded-md"
+                  onClick={toggleSearch}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-12 h-12 object-cover rounded"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold">{product.name}</p>
+                    <p className="text-xs text-gray-500">Rs. {product.price.toLocaleString()}</p>
+                  </div>
+                </Link>
+              ))
+            ) : searchQuery.trim() ? (
+              <p className="text-sm text-gray-500 text-center">No products found</p>
+            ) : (
+              <p className="text-sm text-gray-500 text-center">Start typing to search</p>
+            )}
+          </div>
         </div>
       </div>
 
