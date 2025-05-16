@@ -1,5 +1,3 @@
-import React from "react";
-
 const FeatureCard = ({ icon, title, description }) => (
   <div className="flex-1 p-4 text-center">
     <div className="flex justify-center mb-2">{icon}</div>

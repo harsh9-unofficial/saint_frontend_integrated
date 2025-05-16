@@ -51,19 +51,19 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             </div>
           )}
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Category</h3>
+            <h2 className="text-lg font-semibold text-gray-700">Category</h2>
             <p className="text-gray-500">{product.Category?.name || "-"}</p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Collection</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Collection</h3>
             <p className="text-gray-500">{product.Collection?.name || "-"}</p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Base Price</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Base Price</h3>
             <p className="text-gray-500">{product.basePrice || "-"}</p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Colors</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Colors</h3>
             <p className="text-gray-500">
               {product.ProductColors.length > 0
                 ? product.ProductColors.map((c) => c.name).join(", ")
@@ -71,7 +71,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Sizes</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Sizes</h3>
             <p className="text-gray-500">
               {product.ProductSizes?.length > 0
                 ? product.ProductSizes.map(
@@ -82,11 +82,11 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             </p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Description</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Description</h3>
             <p className="text-gray-500">{product.description || "-"}</p>
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Details</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Details</h3>
             {product.details?.length > 0 ? (
               <ul className="list-disc pl-5 text-gray-500">
                 {product.details.map((detail, index) => (
@@ -100,7 +100,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">Size & Fit</h3>
+            <h3 className="text-lg font-semibold text-gray-700">Size & Fit</h3>
             {product.sizeFit?.length > 0 ? (
               <ul className="list-disc pl-5 text-gray-500">
                 {product.sizeFit.map((item, index) => (
@@ -114,7 +114,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-lg font-semibold text-gray-700">
               Material & Care
             </h3>
             {product.materialCare?.length > 0 ? (
@@ -130,7 +130,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-700">
+            <h3 className="text-lg font-semibold text-gray-700">
               Shipping & Return
             </h3>
             {product.shippingReturn?.length > 0 ? (

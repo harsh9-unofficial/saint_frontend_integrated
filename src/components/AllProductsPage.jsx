@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FiShoppingBag } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
@@ -275,7 +275,9 @@ export default function AllProductsPage() {
 
                   <div className="flex justify-between items-center gap-2">
                     <button className="flex-1 bg-[#527557] text-[#F6F6F6] py-2 px-3 rounded cursor-pointer text-sm">
-                      <Link to={`/singleproduct/${product.id}`}>View Details</Link>
+                      <Link to={`/singleproduct/${product.id}`}>
+                        View Details
+                      </Link>
                     </button>
                     <button className="p-2 border border-[#527557] bg-[#527557] rounded cursor-pointer">
                       <FiShoppingBag className="text-[#F6F6F6]" />

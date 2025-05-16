@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function OurStoryPage() {
   return (
     <div className="px-4 pt-10 pb-16 container mx-auto">

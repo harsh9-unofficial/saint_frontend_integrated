@@ -1,4 +1,3 @@
-import React from "react";
 import HeroImage from "./HeroImage";
 import Marquee from "./Marquee";
 import CollectionCard from "./CollectionCard";

@@ -1,4 +1,3 @@
-import React from "react";
 import { RxCross1, RxPlus } from "react-icons/rx";
 import { Link } from "react-router-dom";
 

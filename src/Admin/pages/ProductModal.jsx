@@ -34,7 +34,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
   const [sizeInput, setSizeInput] = useState({
     sizeId: "",
     originalPrice: "",
-    stock: "",
+    originalQty: "",
   });
   const [detailInput, setDetailInput] = useState("");
   const [sizeFitInput, setSizeFitInput] = useState("");
@@ -101,13 +101,13 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
             sizeId: size.sizeId || size.id, // Handle both updateProduct and createProduct
             name: size.name || "",
             originalPrice: size.originalPrice || "",
-            stock: size.stock || "",
+            originalQty: size.originalQty || "",
           })) ||
           product.Sizes?.map((size) => ({
             sizeId: size.id, // From Size model
             name: size.name || "",
             originalPrice: size.ProductSize?.originalPrice || "",
-            stock: size.ProductSize?.stock || "",
+            originalQty: size.ProductSize?.originalQty || "",
           })) ||
           [],
       });
@@ -185,7 +185,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
     if (
       sizeInput.sizeId &&
       sizeInput.originalPrice !== "" &&
-      sizeInput.stock !== ""
+      sizeInput.originalQty !== ""
     ) {
       // Find the selected size to get its name
       const selectedSize = availableSizes.find(
@@ -211,11 +211,11 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
             sizeId: parseInt(sizeInput.sizeId),
             name: selectedSize.name, // Derive name from availableSizes
             originalPrice: parseFloat(sizeInput.originalPrice),
-            stock: parseInt(sizeInput.stock),
+            originalQty: parseInt(sizeInput.originalQty),
           },
         ],
       }));
-      setSizeInput({ sizeId: "", originalPrice: "", stock: "" });
+      setSizeInput({ sizeId: "", originalPrice: "", originalQty: "" });
     } else {
       toast.error("Please fill all size fields (size, price, stock)");
     }
@@ -353,7 +353,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
           sizeId: parseInt(s.sizeId),
           name: s.name,
           originalPrice: parseFloat(s.originalPrice),
-          stock: parseInt(s.stock),
+          originalQty: parseInt(s.originalQty),
         }))
       )
     );
@@ -782,9 +782,9 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
               <input
                 type="number"
                 placeholder="Stock"
-                value={sizeInput.stock}
+                value={sizeInput.originalQty}
                 onChange={(e) =>
-                  setSizeInput({ ...sizeInput, stock: e.target.value })
+                  setSizeInput({ ...sizeInput, originalQty: e.target.value })
                 }
                 min="0"
                 className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#527557]"
@@ -808,7 +808,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
                 >
                   <span>
                     {size.name || "Unnamed Size"} - ₹{size.originalPrice}{" "}
-                    (Stock: {size.stock})
+                    (Stock: {size.originalQty})
                   </span>
                   <button
                     type="button"

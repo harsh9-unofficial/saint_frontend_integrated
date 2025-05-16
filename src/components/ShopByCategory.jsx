@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 const ShopByCategory = () => {
   return (
     <>
-      {/* <div className="absolute left-0 top-full w-full bg-white shadow-xl border-t z-40"> */}
-      <section className="container mx-auto py-10 px-4 ">
+      <section className="container mx-auto py-10 px-2 ">
         <h2 className="text-2xl md:text-3xl font-semibold text-center mb-10">
           Shop By Category
         </h2>
@@ -25,7 +24,6 @@ const ShopByCategory = () => {
             />
           </Link>
 
-          {/* Original: Yellow Dress */}
           <Link
             to="/collection/yellow-dress"
             className="group text-center relative"
@@ -42,7 +40,6 @@ const ShopByCategory = () => {
             />
           </Link>
 
-          {/* Original: Camo Jacket */}
           <Link
             to="/collection/camo-jacket"
             className="group text-center relative"
@@ -59,7 +56,6 @@ const ShopByCategory = () => {
             />
           </Link>
 
-          {/* Original: Black Dress */}
           <Link
             to="/collection/black-dress"
             className="group text-center relative"
@@ -77,7 +73,6 @@ const ShopByCategory = () => {
           </Link>
         </div>
       </section>
-      {/* </div> */}
     </>
   );
 };

@@ -1,4 +1,3 @@
-import React from "react";
 import { FiShoppingBag } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
