@@ -1,38 +1,49 @@
+import { useState, useEffect } from "react";
 import { FiShoppingBag } from "react-icons/fi";
 import { Link } from "react-router-dom";
-
-const products = [
-  {
-    id: 1,
-    title: "Classic Green Tee",
-    price: "$29.99",
-    category: "Shirt",
-    image: "/images/Shirt.png",
-  },
-  {
-    id: 2,
-    title: "Floral Print Blouse",
-    price: "$29.99",
-    category: "Dress",
-    image: "/images/Dress.png",
-  },
-  {
-    id: 3,
-    title: "Casual Denim Jacket",
-    price: "$29.99",
-    category: "Jacket",
-    image: "/images/Jacket.png",
-  },
-  {
-    id: 4,
-    title: "Summer Dress",
-    price: "$29.99",
-    category: "T-Shirt",
-    image: "/images/Tshirt.png",
-  },
-];
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
 
 const CollectionCard = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${USER_BASE_URL}/products`);
+        const data = response.data;
+        console.log(data);
+
+        const mappedProducts = data.map((product, index) => ({
+          id: product.id,
+          title: product.name,
+          price: `₹ ${product.basePrice}`,
+          category: product.Category.name,
+          image: product.Images[0].imageUrl, // Cycle through images if fewer images than products
+        }));
+
+        console.log(mappedProducts);
+        setProducts(mappedProducts);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch products");
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-10">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-10 text-red-500">{error}</div>;
+  }
+
   return (
     <section className="container mx-auto py-10 px-2">
       <h2 className="text-2xl md:text-3xl font-semibold text-center mb-10">
@@ -48,9 +59,9 @@ const CollectionCard = () => {
             <div className="relative">
               <Link to={`/singleproduct/${product.id}`}>
                 <img
-                  src={product.image}
+                  src={`${USER_BASE_URL}${product.image}`}
                   alt={product.title}
-                  className="w-full object-cover"
+                  className="w-full h-48 md:h-70 lg:h-75 xl:h-100 2xl:h-120"
                 />
               </Link>
               <span className="absolute bottom-2 left-2 bg-[#527557] text-[#F6F6F6] text-xs px-2 py-1 rounded">
@@ -66,7 +77,7 @@ const CollectionCard = () => {
                 {product.price}
               </p>
 
-              <div className="hidden md:flex flex-col md:flex-row justify-between items-center gap-2">
+              <div className="hidden md:flex flex-col md:flex-row justify-between items-center gap-2 pt-2">
                 <button className="flex-1 bg-[#527557] text-[#F6F6F6] py-2 px-3 rounded cursor-pointer text-sm">
                   <Link to={`/singleproduct/${product.id}`}>View Details</Link>
                 </button>

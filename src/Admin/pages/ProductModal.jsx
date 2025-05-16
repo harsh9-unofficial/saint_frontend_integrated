@@ -740,7 +740,7 @@ const ProductModal = ({ isOpen, onClose, product, refreshProducts }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Sizes *
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2">
               <select
                 value={sizeInput.sizeId}
                 onChange={(e) => {

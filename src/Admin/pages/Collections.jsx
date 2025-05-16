@@ -108,7 +108,7 @@ const Collections = () => {
                     <img
                       src={`${USER_BASE_URL}/${collection.images[0]}`}
                       alt={collection.name}
-                      className="w-full h-full"
+                      className="w-full"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">

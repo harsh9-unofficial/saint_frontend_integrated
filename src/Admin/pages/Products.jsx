@@ -43,7 +43,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             <img
               src={`${USER_BASE_URL}${product.images[0]}`}
               alt={product.name}
-              className="w-full h-48 object-cover rounded-lg"
+              className="w-full h-80 md:h-120 lg:h-140 xl:h-150 2xl:h-140"
             />
           ) : (
             <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 text-sm">
@@ -64,22 +64,29 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-700">Colors</h3>
-            <p className="text-gray-500">
-              {product.ProductColors.length > 0
-                ? product.ProductColors.map((c) => c.name).join(", ")
-                : "-"}
-            </p>
+            {product.ProductColors.length > 0 ? (
+              <ul className="list-disc pl-5 text-gray-500">
+                {product.ProductColors.map((color, index) => (
+                  <li key={index}>{color.name}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">-</p>
+            )}
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-700">Sizes</h3>
-            <p className="text-gray-500">
-              {product.ProductSizes?.length > 0
-                ? product.ProductSizes.map(
-                    (s) =>
-                      `${s.name} (Stock: ${s.stock}) -> (Original Price: ${s.originalPrice})`
-                  ).join(", ")
-                : "-"}
-            </p>
+            {product.ProductSizes?.length > 0 ? (
+              <ul className="list-disc pl-5 text-gray-500">
+                {product.ProductSizes.map((size, index) => (
+                  <li key={index}>
+                    {size.name} (Stock: {size.originalQty}) - Original Price: {size.originalPrice}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500">-</p>
+            )}
           </div>
           <div>
             <h3 className="text-lg font-semibold text-gray-700">Description</h3>
@@ -125,7 +132,7 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
               </ul>
             ) : (
               <p className="text-gray-500">
-                No material & care information available.
+                No material &替代 care information available.
               </p>
             )}
           </div>
@@ -322,14 +329,14 @@ const Products = () => {
           {filteredProducts.map((product) => (
             <div
               key={product.id}
-              className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col min-h-[300px]"
+              className="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-2xl transition-shadow flex flex-col min-h-[300px]"
             >
               <div className="overflow-hidden bg-gray-100 h-72">
                 {product.images && product.images.length > 0 ? (
                   <img
                     src={`${USER_BASE_URL}${product.images[0]}`}
                     alt={product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
