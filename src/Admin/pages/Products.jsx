@@ -352,7 +352,7 @@ const Products = () => {
                         setIsDetailsModalOpen(true);
                       }, 0);
                     }}
-                    className="p-2 bg-white rounded-full shadow text-blue-600 hover:bg-blue-50 cursor-pointer"
+                    className="p-2 bg-white rounded-full shadow text-blue-600 hover:bg-blue-100 cursor-pointer"
                     title="View Details"
                   >
                     <EyeIcon className="h-4 w-4" />
@@ -362,7 +362,7 @@ const Products = () => {
                       setCurrentProduct(product);
                       setIsModalOpen(true);
                     }}
-                    className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-indigo-50 cursor-pointer"
+                    className="p-2 bg-white rounded-full shadow text-[#527557] hover:bg-[#dbe7dc] cursor-pointer"
                     title="Edit"
                   >
                     <PencilSquareIcon className="h-4 w-4" />

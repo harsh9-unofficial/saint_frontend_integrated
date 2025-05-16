@@ -74,7 +74,7 @@ const CollectionCard = () => {
                 {product.title}
               </h3>
               <p className="text-green-700 text-sm md:text-base font-semibold">
-                {product.price}
+                ₹ {product.price}
               </p>
 
               <div className="hidden md:flex flex-col md:flex-row justify-between items-center gap-2 pt-2">

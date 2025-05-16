@@ -1,83 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiShoppingBag } from "react-icons/fi";
 import { Link } from "react-router-dom";
-
-const products = [
-  {
-    id: 1,
-    title: "Olive Cotton T-Shirt",
-    price: 799,
-    category: "Kids",
-    size: ["M", "L"],
-    color: "#527557",
-    image: "/images/FP1.png",
-  },
-  {
-    id: 2,
-    title: "Yellow Floral Kurti",
-    price: 1199,
-    category: "Woman",
-    size: ["S", "M"],
-    color: "#DFAA3C",
-    image: "/images/FP2.png",
-  },
-  {
-    id: 3,
-    title: "Denim Casual Jacket",
-    price: 2399,
-    category: "Man",
-    size: ["L", "XL"],
-    color: "#435462",
-    image: "/images/FP3.png",
-  },
-  {
-    id: 4,
-    title: "Beige Summer Dress",
-    price: 1599,
-    category: "Woman",
-    size: ["XS", "S"],
-    color: "#E2DBCB",
-    image: "/images/FP4.png",
-  },
-  {
-    id: 5,
-    title: "Slim Fit Polo",
-    price: 899,
-    category: "Accessories",
-    size: ["M"],
-    color: "#527557",
-    image: "/images/Shirt.png",
-  },
-  {
-    id: 6,
-    title: "Printed Anarkali",
-    price: 1799,
-    category: "Woman",
-    size: ["S"],
-    color: "#DFAA3C",
-    image: "/images/Dress.png",
-  },
-  {
-    id: 7,
-    title: "Winter Hooded Jacket",
-    price: 2999,
-    category: "Man",
-    size: ["XL"],
-    color: "#435462",
-    image: "/images/Jacket.png",
-  },
-  {
-    id: 8,
-    title: "Graphic Cotton Tee",
-    price: 699,
-    category: "Kids",
-    size: ["S", "M"],
-    color: "#E2DBCB",
-    image: "/images/Tshirt.png",
-  },
-];
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
 
 export default function NewArrivalsPage() {
+  const [products, setProducts] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
@@ -85,6 +13,38 @@ export default function NewArrivalsPage() {
   const [maxPrice, setMaxPrice] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("Featured");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${USER_BASE_URL}/products`);
+        const data = response.data;
+
+        const mappedProducts = data.map((product) => ({
+          id: product.id,
+          title: product.name,
+          price: product.basePrice,
+          category: product.Category.name,
+          size: product.sizes || ["M"],
+          color: product.color || "#527557",
+          image: `${USER_BASE_URL}${product.Images[0].imageUrl}`,
+        }));
+
+        console.log(mappedProducts);
+
+        setProducts(mappedProducts);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch products. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleCheckbox = (value, list, setter) => {
     setter((prev) =>
@@ -130,6 +90,22 @@ export default function NewArrivalsPage() {
       if (sortOption === "Price: High to Low") return b.price - a.price;
       return 0; // Default (Featured)
     });
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-4 px-2 text-center">
+        <p className="text-lg">Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-4 px-2 text-center">
+        <p className="text-lg text-red-600">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-4 px-2">
@@ -248,18 +224,18 @@ export default function NewArrivalsPage() {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredProducts.map((product) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 xl:gap-6">
+            {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-xl overflow-hidden border shadow-sm hover:shadow-md transition-all duration-300"
+                className="bg-white rounded-xl overflow-hidden border border-gray-500 shadow-sm hover:shadow-md transition-all duration-300"
               >
                 <div className="relative">
                   <Link to={`/singleproduct/${product.id}`}>
                     <img
-                      src={product.image}
+                      src={`${product.image}`}
                       alt={product.title}
-                      className="w-full object-cover"
+                      className="w-full h-48 md:h-70 lg:h-75 xl:h-100 2xl:h-120"
                     />
                   </Link>
                   <span className="absolute bottom-2 left-2 bg-[#527557] text-[#F6F6F6] text-xs px-2 py-1 rounded">
@@ -267,15 +243,19 @@ export default function NewArrivalsPage() {
                   </span>
                 </div>
 
-                <div className="p-4">
-                  <h3 className="font-medium text-lg mb-1">{product.title}</h3>
-                  <p className="text-green-700 font-semibold mb-4">
-                    ₹{product.price.toLocaleString("en-IN")}
+                <div className="p-2 md:p-4">
+                  <h3 className="font-medium md:text-lg mb-1 truncate">
+                    {product.title}
+                  </h3>
+                  <p className="text-green-700 text-sm md:text-base font-semibold">
+                    ₹ {product.price}
                   </p>
 
-                  <div className="flex justify-between items-center gap-2">
+                  <div className="hidden md:flex flex-col md:flex-row justify-between items-center gap-2 pt-2">
                     <button className="flex-1 bg-[#527557] text-[#F6F6F6] py-2 px-3 rounded cursor-pointer text-sm">
-                      <Link to={`/singleproduct/${product.id}`}>View Details</Link>
+                      <Link to={`/singleproduct/${product.id}`}>
+                        View Details
+                      </Link>
                     </button>
                     <button className="p-2 border border-[#527557] bg-[#527557] rounded cursor-pointer">
                       <FiShoppingBag className="text-[#F6F6F6]" />
