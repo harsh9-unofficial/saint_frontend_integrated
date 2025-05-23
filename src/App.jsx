@@ -30,7 +30,6 @@ import ReturnPolicyPage from "./components/ReturnPolicyPage";
 import AdminLayout from "./Admin/AdminLayout";
 import Dashboard from "./Admin/pages/Dashboard";
 import Products from "./Admin/pages/Products";
-import Blogs from "./Admin/pages/Categories";
 import Contact from "./Admin/pages/Contact";
 import Reviews from "./Admin/pages/Reviews";
 import Users from "./Admin/pages/Users";
@@ -39,6 +38,9 @@ import CollectionPage from "./components/CollectionPage";
 import Collections from "./Admin/pages/Collections";
 import Colors from "./Admin/pages/Colors";
 import OrderSuccessfulPage from "./components/OrderSuccessfulPage";
+import Banners from "./Admin/pages/Banner";
+import Categories from "./Admin/pages/Categories";
+import HomePageVideo from "./Admin/pages/HomePageVideo";
 
 const PublicLayout = () => {
   const location = useLocation();
@@ -123,7 +125,9 @@ function App() {
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="categories" element={<Blogs />} />
+          <Route path="banner" element={<Banners />} />
+          <Route path="video" element={<HomePageVideo />} />
+          <Route path="categories" element={<Categories />} />
           <Route path="collections" element={<Collections />} />
           <Route path="colors" element={<Colors />} />
           <Route path="products" element={<Products />} />

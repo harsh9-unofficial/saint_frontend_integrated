@@ -15,6 +15,8 @@ import { Palette, Ruler } from "lucide-react";
 const Sidebar = ({ onClose }) => {
   const navItems = [
     { name: "Dashboard", path: "/admin", icon: ChartBarIcon },
+    { name: "Banner", path: "/admin/banner", icon: Squares2X2Icon },
+    { name: "Video", path: "/admin/video", icon: Squares2X2Icon },
     { name: "Categories", path: "/admin/categories", icon: Squares2X2Icon },
     { name: "Collections", path: "/admin/collections", icon: FolderIcon },
     { name: "Colors", path: "/admin/colors", icon: Palette },

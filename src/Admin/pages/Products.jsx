@@ -75,20 +75,6 @@ const ProductDetailsModal = ({ isOpen, onClose, product }) => {
             )}
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-700">Sizes</h3>
-            {product.ProductSizes?.length > 0 ? (
-              <ul className="list-disc pl-5 text-gray-500">
-                {product.ProductSizes.map((size, index) => (
-                  <li key={index}>
-                    {size.name} (Stock: {size.originalQty}) - Original Price: {size.originalPrice}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">-</p>
-            )}
-          </div>
-          <div>
             <h3 className="text-lg font-semibold text-gray-700">Description</h3>
             <p className="text-gray-500">{product.description || "-"}</p>
           </div>
@@ -210,7 +196,6 @@ const Products = () => {
           ...product,
           images: product.images || [],
           Colors: product.Colors || [],
-          Sizes: product.Sizes || [],
           Category: product.Category || { name: "-" },
           Collection: product.Collection || { name: "-" },
           details: parseArray(product.details),
