@@ -1,6 +1,64 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
+import toast from "react-hot-toast";
 
 const Footer = () => {
+  // State to manage form inputs
+  const [email, setEmail] = useState("");
+  const [name, setFirstName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!email || !name) {
+      toast.error("Please fill out both fields.");
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await axios.post(`${USER_BASE_URL}/update/addUpdate`, {
+        email,
+        name,
+      });
+
+      if (response.status === 201) {
+        toast.success("Successfully subscribed to the newsletter!");
+        setEmail("");
+        setFirstName("");
+      }
+    } catch (error) {
+      if (error.response) {
+        // Server responded with a status code outside 2xx
+        toast.error(
+          error.response.data.message ||
+            "Something went wrong. Please try again."
+        );
+      } else if (error.request) {
+        // No response received
+        toast.error("Failed to connect to the server. Please try again later.");
+      } else {
+        // Other errors
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <footer className="relative text-[#F6F6F6] w-full md:h-[820px] xl:h-[850px] 2xl:min-h-screen bg-[#527557]">
       {/* Background Image for Medium and Larger Screens */}
@@ -38,26 +96,38 @@ const Footer = () => {
               Subscribe to our newsletter to receive updates on new arrivals,
               special offers, and other discount information.
             </p>
-            <div className="grid grid-cols-1 gap-4 py-4 px-4 sm:px-7 lg:px-10 xl:px-0 mx-auto w-full md:w-[90%] xl:w-[75%]">
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-1 gap-4 py-4 px-4 sm:px-7 lg:px-10 xl:px-0 mx-auto w-full md:w-[90%] xl:w-[75%]"
+            >
               <input
                 type="email"
                 placeholder="*Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 sm:py-4 rounded placeholder-[#F6F6F6] text-[#F6F6F6] border border-[#F6F6F6] focus:outline-none"
               />
               <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-4 space-y-4 lg:space-y-0">
                 <input
                   type="text"
                   placeholder="*First Name"
+                  value={name}
+                  onChange={(e) => setFirstName(e.target.value)}
                   className="w-full col-span-2 px-4 py-3 sm:py-4 rounded placeholder-[#F6F6F6] text-[#F6F6F6] border border-[#F6F6F6] focus:outline-none"
                 />
                 <button
-                  type="button"
-                  className="bg-[#F6F6F6] text-[#527557] px-4 py-3 sm:py-4 col-span-1 rounded cursor-pointer text-lg sm:text-xl font-semibold w-full"
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={`bg-[#F6F6F6] text-[#527557] px-4 py-3 sm:py-4 col-span-1 rounded text-lg sm:text-xl font-semibold w-full ${
+                    isSubmitting
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
                 >
-                  Sign Up
+                  {isSubmitting ? "Submitting..." : "Sign Up"}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
 
           {/* Right Links */}

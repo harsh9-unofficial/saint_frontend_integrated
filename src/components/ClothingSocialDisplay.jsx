@@ -1,16 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 import { FaInstagram } from "react-icons/fa";
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
 
-const ClothingCard = ({ image }) => {
+const ClothingCard = ({ image, link }) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  const handleClick = () => {
+    if (link) {
+      window.open(link, "_blank");
+    }
+  };
 
   return (
     <div
       className="keen-slider__slide relative h-64 overflow-hidden rounded-lg shadow-lg"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleClick}
     >
       <img src={image} alt="Clothing" className="w-full h-full object-cover" />
       {isHovered && (
@@ -23,15 +32,33 @@ const ClothingCard = ({ image }) => {
 };
 
 const ClothingSocialDisplay = () => {
-  const images = [
-    "/images/Tshirt.png",
-    "/images/Tshirt.png",
-    "/images/Tshirt.png",
-    "/images/Tshirt.png",
-    "/images/Tshirt.png",
-    "/images/Tshirt.png",
-    "/images/Tshirt.png",
-  ];
+  const [items, setItems] = useState([]); // Store both image URL and link
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await axios.get(`${USER_BASE_URL}/instasection`);
+        console.log(response.data);
+
+        const formattedItems = response.data.map((item) => {
+          const imagePath = item.imageUrl.startsWith("/")
+            ? `${USER_BASE_URL}${item.imageUrl}`
+            : item.imageUrl;
+          return { image: imagePath, link: item.link }; // Store both image and link
+        });
+
+        setItems(formattedItems);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch images");
+        setLoading(false);
+      }
+    };
+
+    fetchImages();
+  }, []);
 
   const [sliderRef] = useKeenSlider({
     loop: true,
@@ -73,11 +100,19 @@ const ClothingSocialDisplay = () => {
       <h2 className="text-center text-2xl font-semibold mb-6">
         Stay Social with Us
       </h2>
-      <div ref={sliderRef} className="keen-slider px-4">
-        {images.map((image, index) => (
-          <ClothingCard key={index} image={image} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="text-center">Loading...</div>
+      ) : error ? (
+        <div className="text-center text-red-500">{error}</div>
+      ) : items.length === 0 ? (
+        <div className="text-center">No images available</div>
+      ) : (
+        <div ref={sliderRef} className="keen-slider px-4">
+          {items.map((item, index) => (
+            <ClothingCard key={index} image={item.image} link={item.link} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

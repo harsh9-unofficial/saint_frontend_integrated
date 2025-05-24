@@ -100,11 +100,6 @@ const Dashboard = () => {
   }, [fetchDashboardData]);
 
   const refreshData = useCallback(async () => {
-    // if (!token) {
-    //   toast.error("Please log in to refresh data");
-    //   navigate("/login");
-    //   return;
-    // }
     try {
       setLoading(true);
       const response = await axios.get(
@@ -285,7 +280,7 @@ const Dashboard = () => {
                     >
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-indigo-600 truncate">
-                          {user.userType || "User"}
+                          User
                         </p>
                         <div className="ml-2 flex-shrink-0 flex">
                           <p
@@ -304,19 +299,19 @@ const Dashboard = () => {
                       <div className="mt-2 sm:flex sm:justify-between">
                         <div className="sm:flex items-center">
                           <Users className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1" />
-                          <p className="text-sm text-gray-500">{user.name}</p>
+                          <p className="text-sm text-gray-500">{user.username}</p>
                         </div>
                         <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                           <CalendarIcon className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1" />
                           {formatDate(user.createdAt)}
                         </div>
                       </div>
-                      <div className="mt-2 flex items-start">
+                      {/* <div className="mt-2 flex items-start">
                         <MessageCircle className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1 mt-1" />
                         <p className="text-sm text-gray-500 line-clamp-2">
                           {user.message || "No message provided"}
                         </p>
-                      </div>
+                      </div> */}
                       <div className="mt-2 flex items-center">
                         <EnvelopeIcon className="flex-shrink-0 h-4 w-4 text-gray-400 mr-1" />
                         <a
@@ -391,6 +386,15 @@ const Dashboard = () => {
                 </div>
               </Link>
               <Link
+                to="/admin/orders"
+                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <div className="flex items-center">
+                  <Receipt className="h-5 w-5 text-orange-600 mr-3" />
+                  <span>View Orders</span>
+                </div>
+              </Link>
+              <Link
                 to="/admin/users"
                 className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
@@ -400,7 +404,7 @@ const Dashboard = () => {
                 </div>
               </Link>
               <Link
-                to="/admin/ratings"
+                to="/admin/reviews"
                 className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
               >
                 <div className="flex items-center">
@@ -417,15 +421,7 @@ const Dashboard = () => {
                   <span>View Contacts</span>
                 </div>
               </Link>
-              <Link
-                to="/admin/orders"
-                className="block p-3 border rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center">
-                  <Receipt className="h-5 w-5 text-orange-600 mr-3" />
-                  <span>View Orders</span>
-                </div>
-              </Link>
+              
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ import {
   StarIcon,
   EnvelopeIcon,
   CameraIcon,
-  InboxIcon,
+  InboxIcon,NewspaperIcon,
   XMarkIcon as XIcon,
 } from "@heroicons/react/24/outline";
 import { Palette } from "lucide-react";
@@ -29,6 +29,7 @@ const Sidebar = ({ onClose }) => {
     { name: "Users", path: "/admin/users", icon: UsersIcon },
     { name: "Reviews", path: "/admin/reviews", icon: StarIcon },
     { name: "Contact", path: "/admin/contact", icon: EnvelopeIcon },
+    { name: "Newsletter", path: "/admin/update", icon: NewspaperIcon },
   ];
 
   const handleNavClick = () => {

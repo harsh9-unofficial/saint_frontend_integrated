@@ -19,6 +19,7 @@ const InstaSectionModal = ({ isOpen, onClose, section, refreshSections }) => {
       setFormData({
         link: section.link,
       });
+      console.log(section.imageUrl);
       setPreview(section.imageUrl); // Set preview for existing section
       setSelectedFile(null); // Reset selected file for updates
     } else {
@@ -173,7 +174,7 @@ const InstaSectionModal = ({ isOpen, onClose, section, refreshSections }) => {
               {preview && (
                 <div className="mt-2">
                   <img
-                    src={`${USER_BASE_URL}${preview}`}
+                    src={preview.startsWith("blob:") ? preview : `${USER_BASE_URL}${preview}`}
                     alt="Preview"
                     className="w-32 h-32 object-cover rounded-md"
                     onError={(e) => (e.target.src = "/placeholder-image.jpg")} // Fallback image
@@ -184,7 +185,6 @@ const InstaSectionModal = ({ isOpen, onClose, section, refreshSections }) => {
 
             {/* Link Field */}
             <div>
-            
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Link *
               </label>

@@ -375,8 +375,8 @@ const Header = () => {
           ref={searchRef}
           className="relative bg-white w-full max-w-3xl mx-auto mt-16 md:mt-20 p-4 md:p-6 rounded-lg shadow-2xl"
         >
-          <div className="flex items-center gap-2">
-            <LuSearch className="text-gray-500 text-xl" />
+          <div className="flex items-center gap-1">
+            <LuSearch className="text-gray-500 text-2xl" />
             <input
               type="text"
               value={searchQuery}
@@ -390,10 +390,10 @@ const Header = () => {
               onClick={handleSearchSubmit}
               className="text-gray-500 text-xl hover:text-[#527557]"
             >
-              <IoArrowForward className="text-gray-500 text-xl hover:text-[#527557]" />
+              <IoArrowForward className="text-gray-500 text-2xl hover:text-[#527557] cursor-pointer" />
             </button>
             <button onClick={toggleSearch}>
-              <LuX className="text-gray-500 text-xl hover:text-[#527557]" />
+              <LuX className="text-gray-500 text-2xl hover:text-[#527557] cursor-pointer" />
             </button>
           </div>
           <div className="border-t border-gray-200 mt-4 pt-4 max-h-96 overflow-y-auto">

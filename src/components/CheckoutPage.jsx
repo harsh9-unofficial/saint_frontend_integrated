@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { USER_BASE_URL } from "../config";
 import axios from "axios";
@@ -30,7 +30,6 @@ const CheckoutPage = () => {
     zipCode: "",
     country: "india",
   });
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const indianStates = [
@@ -90,6 +89,7 @@ const CheckoutPage = () => {
 
   const handleRemove = (id) => {
     setCartItems((prev) => prev.filter((item) => item.id !== id));
+    toast.success("Item removed from cart.");
   };
 
   const handleInputChange = (e) => {
@@ -109,22 +109,45 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate user login
     if (!userId) {
-      setError("Please log in to place an order.");
-      return;
-    }
-    if (cartItems.length === 0) {
-      setError("Cart is empty.");
+      toast.error("Please log in to place an order.");
       return;
     }
 
+    // Validate cart
+    if (cartItems.length === 0) {
+      toast.error("Cart is empty.");
+      return;
+    }
+
+    // Validate required form fields
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "streetAddress",
+      "city",
+      "state",
+      "zipCode",
+      "country",
+    ];
+    for (const field of requiredFields) {
+      if (!formData[field]) {
+        toast.error(
+          `Please fill in the ${field.replace(/([A-Z])/g, " $1").toLowerCase()} field.`
+        );
+        return;
+      }
+    }
+
     setLoading(true);
-    setError("");
 
     const payload = {
       userId,
       cartItems: cartItems.map((item) => ({
-        productColorId: item.id, // Use id as productColorId
+        productColorId: item.id,
         quantity: item.quantity,
         price: item.price,
         color: item.color || item.variant,
@@ -154,15 +177,15 @@ const CheckoutPage = () => {
         `${USER_BASE_URL}/orders/create`,
         payload,
         {
-          headers: { Authorization: `Bearer ${token}` }, // Assume token from AuthContext
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast.success("Order successfull");
+      toast.success("Order successful!");
       navigate("/order-confirmation", {
         state: { orderId: response.data.orderId },
       });
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to place order.");
+      toast.error(err.response?.data?.error || "Failed to place order.");
     } finally {
       setLoading(false);
     }
@@ -172,8 +195,6 @@ const CheckoutPage = () => {
     <div className="px-2 md:px-4 py-8 lg:py-12 bg-white text-gray-800 container mx-auto">
       <h2 className="text-3xl font-bold mb-2">Check Out</h2>
       <p className="text-sm text-gray-500 mb-8">Home / Cart / Check out</p>
-
-      {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-8 gap-5 xl:gap-10">
@@ -188,7 +209,6 @@ const CheckoutPage = () => {
                 onChange={handleInputChange}
                 placeholder="First Name"
                 className="input border border-gray-300 p-4"
-                required
               />
               <input
                 type="text"
@@ -197,7 +217,6 @@ const CheckoutPage = () => {
                 onChange={handleInputChange}
                 placeholder="Last Name"
                 className="input border border-gray-300 p-4"
-                required
               />
               <input
                 type="email"
@@ -206,7 +225,6 @@ const CheckoutPage = () => {
                 onChange={handleInputChange}
                 placeholder="Email Address"
                 className="input border border-gray-300 p-4"
-                required
               />
               <input
                 type="text"
@@ -253,7 +271,6 @@ const CheckoutPage = () => {
                   onChange={handleInputChange}
                   placeholder="Street Address"
                   className="border border-gray-300 p-4 w-full sm:col-span-2"
-                  required
                 />
                 <input
                   type="text"
@@ -270,14 +287,12 @@ const CheckoutPage = () => {
                   onChange={handleInputChange}
                   placeholder="City"
                   className="border border-gray-300 p-4 w-full"
-                  required
                 />
                 <select
                   name="state"
                   value={formData.state}
                   onChange={handleInputChange}
                   className="input w-full border border-gray-300 p-4"
-                  required
                 >
                   <option value="">Select State</option>
                   {indianStates.map((state) => (
@@ -293,14 +308,12 @@ const CheckoutPage = () => {
                   onChange={handleInputChange}
                   placeholder="ZIP Code"
                   className="border border-gray-300 p-4 w-full"
-                  required
                 />
                 <select
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
                   className="input w-full border border-gray-300 p-4"
-                  required
                 >
                   <option value="">Country</option>
                   <option value="india">India</option>
@@ -379,6 +392,7 @@ const CheckoutPage = () => {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mt-2">
                       <div className="w-fit border px-2 py-1 md:py-2 flex items-center">
                         <button
+                          type="button" // Prevent form submission
                           onClick={() =>
                             handleQuantityChange(product.id, "dec")
                           }
@@ -388,6 +402,7 @@ const CheckoutPage = () => {
                         </button>
                         <span className="px-3">{product.quantity}</span>
                         <button
+                          type="button" // Prevent form submission
                           onClick={() =>
                             handleQuantityChange(product.id, "inc")
                           }
@@ -396,12 +411,13 @@ const CheckoutPage = () => {
                           +
                         </button>
                       </div>
-                      {/* <button
+                      <button
+                        type="button" // Ensure Remove button doesn't submit
                         onClick={() => handleRemove(product.id)}
                         className="text-lg text-gray-400 underline text-left"
                       >
                         Remove
-                      </button> */}
+                      </button>
                     </div>
                   </div>
                 </div>

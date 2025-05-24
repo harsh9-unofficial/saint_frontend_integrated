@@ -42,6 +42,7 @@ import Banners from "./Admin/pages/Banner";
 import Categories from "./Admin/pages/Categories";
 import HomePageVideo from "./Admin/pages/HomePageVideo";
 import InstagramSection from "./Admin/pages/InstaSections";
+import Update from "./Admin/pages/Update";
 
 const PublicLayout = () => {
   const location = useLocation();
@@ -137,6 +138,7 @@ function App() {
           <Route path="reviews" element={<Reviews />} />
           <Route path="contact" element={<Contact />} />
           <Route path="orders" element={<Orders />} />
+          <Route path="update" element={<Update />} />
         </Route>
       </Routes>
     </Router>

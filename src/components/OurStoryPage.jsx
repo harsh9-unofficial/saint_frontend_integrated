@@ -1,4 +1,25 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { USER_BASE_URL } from "../config";
+import toast from "react-hot-toast";
+
 export default function OurStoryPage() {
+  const [imageUrl, setImageUrl] = useState("");
+
+  useEffect(() => {
+    const fetchBanner = async () => {
+      try {
+        const response = await axios.get(`${USER_BASE_URL}/banners`);
+
+        setImageUrl(response.data[0].imageUrl);
+      } catch (err) {
+        toast.error("Failed to fetch banner image");
+      }
+    };
+
+    fetchBanner();
+  }, []);
+
   return (
     <div className="px-4 pt-10 pb-16 container mx-auto">
       <h1 className="text-3xl font-semibold mb-2">Our Story</h1>
@@ -6,7 +27,7 @@ export default function OurStoryPage() {
 
       <div className="rounded overflow-hidden mb-6">
         <img
-          src="/images/HeroImg.jpg"
+          src={`${USER_BASE_URL}${imageUrl}`}
           alt="Our Story"
           className="w-full h-auto object-cover"
         />

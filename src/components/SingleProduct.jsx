@@ -287,9 +287,7 @@ export default function SingleProduct() {
                 ? product.description
                 : "A classic T-shirt made with premium materials for comfort and style."}
             </p>
-            <p className="text-base sm:text-lg text-gray-600">
-              Made in {product.Category?.name || "Unknown"}.
-            </p>
+            <p className="text-base sm:text-lg text-gray-600">Made in India.</p>
 
             <div>
               <h3 className="font-medium text-base sm:text-lg">

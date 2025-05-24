@@ -130,9 +130,7 @@ const InstaSections = () => {
               </div>
 
               <div className="p-4 flex-grow flex flex-col justify-between">
-                <h3 className="text-lg font-semibold line-clamp-2">
-                  Section {section.id}
-                </h3>
+                
                 <p className="text-gray-600 text-sm line-clamp-3">
                   Link:{" "}
                   <a
