@@ -37,7 +37,7 @@ const Login = () => {
       }
 
       // Redirect based on isAdmin status
-      const redirectRoute = response.data.isAdmin ? "/admin" : "/profile";
+      const redirectRoute = response.data.isAdmin ? "/admin" : "/";
       setTimeout(() => navigate(redirectRoute), 2000);
     } catch (err) {
       toast.error(err.response?.data?.message || "Error logging in");
