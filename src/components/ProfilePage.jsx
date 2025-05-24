@@ -7,7 +7,10 @@ import { USER_BASE_URL } from "../config";
 export default function ProfilePage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Profile");
-  const [profilePic] = useState("/images/avatar.png");
+  const [profilePic, setProfilePic] = useState(null);
+  const [coverPic, setCoverPic] = useState(null);
+  const [isProfileHovering, setIsProfileHovering] = useState(false);
+  const [isCoverHovering, setIsCoverHovering] = useState(false);
   const [showTracking, setShowTracking] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -16,7 +19,7 @@ export default function ProfilePage() {
     rating: 0,
     description: "",
   });
-  const [selectedItemForReview, setSelectedItemForReview] = useState(null); // For item selection
+  const [selectedItemForReview, setSelectedItemForReview] = useState(null);
   const [formData, setFormData] = useState({
     username: "",
     phone: "",
@@ -60,7 +63,7 @@ export default function ProfilePage() {
     }
     fetchUserData();
     fetchOrders();
-  }, [navigate, userId]);
+  }, [navigate, userId, profilePic, coverPic]);
 
   const fetchUserData = useCallback(async () => {
     if (!userId || !token) {
@@ -77,6 +80,8 @@ export default function ProfilePage() {
         phone: response.data.phone || "",
         email: response.data.email || "",
       });
+      setProfilePic(response.data.profileImageUrl || null);
+      setCoverPic(response.data.coverImageUrl || null);
       setError(null);
     } catch (err) {
       setError("Failed to load profile data.");
@@ -185,6 +190,54 @@ export default function ProfilePage() {
       setOrdersLoading(false);
     }
   }, [userId, token, axiosInstance]);
+
+  const handleImageUpload = async (e, type) => {
+    const file = e.target.files[0];
+    if (!file) {
+      console.log("No file selected");
+      toast.error("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append(type === "profile" ? "profileImage" : "coverImage", file);
+
+    try {
+      setLoading(true);
+      const response = await axiosInstance.put(
+        `${USER_BASE_URL}/users/${userId}/upload-${type}-image`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Upload response:", response.data);
+
+      if (type === "profile") {
+        setProfilePic(response.data.profileImage);
+      } else {
+        setCoverPic(response.data.coverImage);
+      }
+      toast.success(
+        `${
+          type === "profile" ? "Profile" : "Cover"
+        } image uploaded successfully!`
+      );
+    } catch (err) {
+      console.error("Upload error:", err.response?.data || err.message);
+      toast.error(
+        `Failed to upload ${type === "profile" ? "profile" : "cover"} image.`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -296,11 +349,32 @@ export default function ProfilePage() {
       <aside className="w-full md:w-64 lg:w-80 border border-gray-400 p-4 lg:p-6 flex flex-col justify-between h-fit">
         <div className="flex flex-col items-center space-y-2">
           <div className="flex flex-col sm:flex-row items-center gap-2">
-            <div>
-              <img
-                src={profilePic}
-                alt="avatar"
-                className="w-16 sm:w-20 h-16 sm:h-20 rounded-full mb-2"
+            <div
+              className="relative"
+              onMouseEnter={() => setIsProfileHovering(true)}
+              onMouseLeave={() => setIsProfileHovering(false)}
+            >
+              <label
+                htmlFor="profile-upload-sidebar"
+                className="cursor-pointer"
+              >
+                <img
+                  src={`${USER_BASE_URL}${profilePic}` || "/images/avatar.png"}
+                  alt="avatar"
+                  className="w-16 sm:w-20 h-16 sm:h-20 rounded-full mb-2 object-cover"
+                />
+                {isProfileHovering && (
+                  <div className="absolute top-0 left-0 w-16 sm:w-20 h-16 sm:h-20 flex items-center justify-center bg-black/50 bg-opacity-50 rounded-full">
+                    <span className="text-white text-xs">Upload pic</span>
+                  </div>
+                )}
+              </label>
+              <input
+                id="profile-upload-sidebar"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, "profile")}
+                className="hidden"
               />
             </div>
             <div className="text-center sm:text-left">
@@ -345,19 +419,66 @@ export default function ProfilePage() {
         {activeTab === "Profile" ? (
           <>
             <div className="relative h-48 sm:h-64 md:h-92 lg:h-98">
-              <div className="w-full h-full bg-cover bg-center rounded-lg overflow-hidden mb-4 sm:mb-6">
-                <img
-                  src="/images/ProfileBanner.jpg"
-                  alt="Cover Photo"
-                  className="w-full h-40 sm:h-48 md:h-65 lg:h-70 py-4 md:py-0 bg-center rounded-lg overflow-hidden mb-4 sm:mb-6"
+              <div
+                className="relative w-full h-40 sm:h-48 md:h-65 lg:h-70 bg-cover bg-center rounded-lg overflow-hidden mb-4 sm:mb-6 cursor-pointer"
+                onMouseEnter={() => setIsCoverHovering(true)}
+                onMouseLeave={() => setIsCoverHovering(false)}
+              >
+                <label
+                  htmlFor="cover-upload"
+                  className="cursor-pointer block w-full h-full"
+                >
+                  <img
+                    src={
+                      `${USER_BASE_URL}${coverPic}` ||
+                      "/images/ProfileBanner.jpg"
+                    }
+                    alt="Cover Photo"
+                    className="w-full h-40 sm:h-48 md:h-65 lg:h-70 py-4 md:py-0 bg-center rounded-lg overflow-hidden mb-4 sm:mb-6 object-cover"
+                  />
+                  {isCoverHovering && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 bg-opacity-50">
+                      <span className="text-white text-sm">Upload pic</span>
+                    </div>
+                  )}
+                </label>
+                <input
+                  id="cover-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e, "cover")}
+                  className="hidden"
                 />
               </div>
               <div className="absolute bottom-0 md:left-8 lg:left-20 flex items-center">
-                <div>
-                  <img
-                    src={profilePic}
-                    alt="avatar"
-                    className="w-20 sm:w-24 h-20 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full mr-0 sm:mr-4"
+                <div
+                  className="relative cursor-pointer"
+                  onMouseEnter={() => setIsProfileHovering(true)}
+                  onMouseLeave={() => setIsProfileHovering(false)}
+                >
+                  <label
+                    htmlFor="profile-upload-main"
+                    className="cursor-pointer"
+                  >
+                    <img
+                      src={
+                        `${USER_BASE_URL}${profilePic}` || "/images/avatar.png"
+                      }
+                      alt="avatar"
+                      className="w-20 sm:w-24 h-20 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 rounded-full mr-0 sm:mr-4 object-cover"
+                    />
+                    {isProfileHovering && (
+                      <div className="absolute top-0 left-0 w-20 sm:w-24 h-20 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 flex items-center justify-center bg-black/50 bg-opacity-50 rounded-full">
+                        <span className="text-white text-xs">Upload pic</span>
+                      </div>
+                    )}
+                  </label>
+                  <input
+                    id="profile-upload-main"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, "profile")}
+                    className="hidden"
                   />
                 </div>
                 <div className="py-4 ml-2 md:ml-0 text-center sm:text-left">
@@ -452,7 +573,6 @@ export default function ProfilePage() {
                       <p className="text-xs sm:text-sm font-semibold text-center">
                         {step.status}
                       </p>
-                      {/* <p className="text-xs text-gray-500">{step.date}</p> */}
                     </div>
                   ))}
                 </div>
