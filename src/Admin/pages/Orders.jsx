@@ -145,7 +145,7 @@ const Orders = () => {
           <input
             type="text"
             placeholder="Search by Order ID or Product Name..."
-            className="w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-3 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -407,7 +407,7 @@ const Orders = () => {
                                 Price: ₹ {item.Product.price.toFixed(2)}
                               </p>
                               <p className="text-sm text-gray-600">
-                                Subtotal: ₹ 
+                                Subtotal: ₹
                                 {(item.Product.price * item.quantity).toFixed(
                                   2
                                 )}

@@ -41,6 +41,7 @@ import OrderSuccessfulPage from "./components/OrderSuccessfulPage";
 import Banners from "./Admin/pages/Banner";
 import Categories from "./Admin/pages/Categories";
 import HomePageVideo from "./Admin/pages/HomePageVideo";
+import InstagramSection from "./Admin/pages/InstaSections";
 
 const PublicLayout = () => {
   const location = useLocation();
@@ -127,6 +128,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="banner" element={<Banners />} />
           <Route path="video" element={<HomePageVideo />} />
+          <Route path="insta" element={<InstagramSection />} />
           <Route path="categories" element={<Categories />} />
           <Route path="collections" element={<Collections />} />
           <Route path="colors" element={<Colors />} />

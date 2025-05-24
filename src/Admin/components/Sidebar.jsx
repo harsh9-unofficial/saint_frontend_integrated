@@ -1,30 +1,34 @@
 import { NavLink } from "react-router-dom";
 import {
   ChartBarSquareIcon as ChartBarIcon,
+  RectangleStackIcon,
+  VideoCameraIcon,
   Squares2X2Icon,
+  FolderIcon,
   ShoppingBagIcon,
   UsersIcon,
   StarIcon,
   EnvelopeIcon,
+  CameraIcon,
   InboxIcon,
-  FolderIcon,
   XMarkIcon as XIcon,
 } from "@heroicons/react/24/outline";
-import { Palette, Ruler } from "lucide-react";
+import { Palette } from "lucide-react";
 
 const Sidebar = ({ onClose }) => {
   const navItems = [
     { name: "Dashboard", path: "/admin", icon: ChartBarIcon },
-    { name: "Banner", path: "/admin/banner", icon: Squares2X2Icon },
-    { name: "Video", path: "/admin/video", icon: Squares2X2Icon },
     { name: "Categories", path: "/admin/categories", icon: Squares2X2Icon },
     { name: "Collections", path: "/admin/collections", icon: FolderIcon },
     { name: "Colors", path: "/admin/colors", icon: Palette },
     { name: "Products", path: "/admin/products", icon: ShoppingBagIcon },
+    { name: "Orders", path: "/admin/orders", icon: InboxIcon },
+    { name: "Banner", path: "/admin/banner", icon: RectangleStackIcon },
+    { name: "Video", path: "/admin/video", icon: VideoCameraIcon },
+    { name: "Instagram", path: "/admin/insta", icon: CameraIcon },
     { name: "Users", path: "/admin/users", icon: UsersIcon },
     { name: "Reviews", path: "/admin/reviews", icon: StarIcon },
     { name: "Contact", path: "/admin/contact", icon: EnvelopeIcon },
-    { name: "Orders", path: "/admin/orders", icon: InboxIcon },
   ];
 
   const handleNavClick = () => {
